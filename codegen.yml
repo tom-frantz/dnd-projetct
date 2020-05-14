@@ -11,3 +11,6 @@ generates:
   react/graph/graphql.schema.json:
     plugins:
       - "introspection"
+  react/graph/schema.graphql:
+    plugins:
+      - "schema-ast"
