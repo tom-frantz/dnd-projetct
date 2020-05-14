@@ -1,0 +1,13 @@
+overwrite: true
+schema: "http://127.0.0.1:5000/graphql"
+documents: "react/graph/**/*.ts"
+generates:
+  react/graph/graphql.tsx:
+    plugins:
+      - "typescript"
+      - "typescript-operations"
+      - "typescript-react-apollo"
+      - "fragment-matcher"
+  react/graph/graphql.schema.json:
+    plugins:
+      - "introspection"
