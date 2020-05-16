@@ -1,7 +1,7 @@
 type Query {
   me: User
   user(id: ID!): User
-  users(before: String, after: String, first: Int, last: Int, id: ID, password: String, roles: String, username: String): UserConnection
+  users(before: String, after: String, first: Int, last: Int, id: ID, roles: String, username: String): UserConnection
   templates(before: String, after: String, first: Int, last: Int, created: DateTime, id: ID): TemplateConnection
   documents(before: String, after: String, first: Int, last: Int, created: DateTime, id: ID, values: JSONString, author: ID, template: ID): DocumentConnection
 }
@@ -11,9 +11,6 @@ type User implements Node {
 
   # The ID of the object.
   id: ID!
-
-  #
-  password: String!
 
   #
   roles: [String]
@@ -115,13 +112,13 @@ scalar JSONString
 
 type DocumentSection {
   #
-  defaultParams: JSONString
+  content: String
 
   #
   name: String!
 
   #
-  renderType: String!
+  params: JSONString
 }
 
 type UserConnection {

@@ -46,7 +46,6 @@ export type QueryUsersArgs = {
     first?: Maybe<Scalars["Int"]>;
     last?: Maybe<Scalars["Int"]>;
     id?: Maybe<Scalars["ID"]>;
-    password?: Maybe<Scalars["String"]>;
     roles?: Maybe<Scalars["String"]>;
     username?: Maybe<Scalars["String"]>;
 };
@@ -77,7 +76,6 @@ export type User = Node & {
     articles?: Maybe<DocumentConnection>;
     /** The ID of the object. */
     id: Scalars["ID"];
-    password: Scalars["String"];
     roles?: Maybe<Array<Maybe<Scalars["String"]>>>;
     username: Scalars["String"];
 };
@@ -158,9 +156,9 @@ export type TemplateSection = {
 
 export type DocumentSection = {
     __typename?: "DocumentSection";
-    defaultParams?: Maybe<Scalars["JSONString"]>;
+    content?: Maybe<Scalars["String"]>;
     name: Scalars["String"];
-    renderType: Scalars["String"];
+    params?: Maybe<Scalars["JSONString"]>;
 };
 
 export type UserConnection = {

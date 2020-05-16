@@ -11,7 +11,7 @@ from mongoengine import (
 
 
 class TemplateSectionModel(EmbeddedDocument):
-    name = StringField(required=True)
+    name = StringField(required=True, unique=True)
     render_type = StringField(required=True)
     default_params = DictField(default=dict)
 

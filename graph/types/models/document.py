@@ -14,8 +14,8 @@ from mongoengine import (
 
 class DocumentSectionModel(EmbeddedDocument):
     name = StringField(required=True)
-    render_type = StringField(required=True)
-    default_params = DictField(default=dict)
+    params = DictField(default=dict)
+    content = StringField()
 
 
 class DocumentModel(Document):

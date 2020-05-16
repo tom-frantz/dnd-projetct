@@ -6,5 +6,6 @@ from graph.types.models.user import UserModel
 
 class User(MongoengineObjectType):
     class Meta:
+        exclude_fields = ("password",)
         model = UserModel
         interfaces = (Node,)

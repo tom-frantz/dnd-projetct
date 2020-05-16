@@ -128,16 +128,6 @@
                 "defaultValue": null
               },
               {
-                "name": "password",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
                 "name": "roles",
                 "description": null,
                 "type": {
@@ -486,22 +476,6 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "ID",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "password",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
                 "ofType": null
               }
             },
@@ -1003,12 +977,12 @@
         "description": null,
         "fields": [
           {
-            "name": "defaultParams",
+            "name": "content",
             "description": "",
             "args": [],
             "type": {
               "kind": "SCALAR",
-              "name": "JSONString",
+              "name": "String",
               "ofType": null
             },
             "isDeprecated": false,
@@ -1031,17 +1005,13 @@
             "deprecationReason": null
           },
           {
-            "name": "renderType",
+            "name": "params",
             "description": "",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": null
-              }
+              "kind": "SCALAR",
+              "name": "JSONString",
+              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
