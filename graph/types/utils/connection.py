@@ -2,9 +2,6 @@ from graphene_mongo import MongoengineConnectionField
 
 
 class CustomConnectionField(MongoengineConnectionField):
-    def __init_subclass__(cls, **kwargs):
-        print("III", cls.Meta)
-
     @property
     def field_args(self):
         field_args = super(CustomConnectionField, self).field_args
