@@ -1,6 +1,6 @@
 from graphene import ObjectType, List, NonNull, Mutation, Union, Node
 
-from graph.types.error import Error
+from graph.types.utils.error import Error
 
 
 class MutationFail(ObjectType):

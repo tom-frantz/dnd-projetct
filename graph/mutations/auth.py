@@ -3,7 +3,7 @@ from graphene import String, ObjectType
 from passlib.handlers.pbkdf2 import pbkdf2_sha256
 
 from graph.mutations.base import BaseMutation
-from graph.types.error import Error
+from graph.types.utils.error import Error
 from graph.types.models.user import UserModel
 
 
