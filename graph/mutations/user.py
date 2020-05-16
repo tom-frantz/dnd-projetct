@@ -1,7 +1,7 @@
 from graphene import String, ObjectType, Field
 from passlib.handlers.pbkdf2 import pbkdf2_sha256
 
-from graph.mutations.base import BaseMutation
+from graph.mutations import BaseMutation
 from graph.types.user import User
 from graph.types.models.user import UserModel
 
