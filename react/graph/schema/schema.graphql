@@ -1,7 +1,193 @@
 type Query {
-  me: String
+  me: User
+  user(id: ID!): User
+  users(before: String, after: String, first: Int, last: Int, id: ID, password: String, roles: String, username: String): UserConnection
+  templates(before: String, after: String, first: Int, last: Int, created: DateTime, id: ID): TemplateConnection
+  documents(before: String, after: String, first: Int, last: Int, created: DateTime, id: ID, values: JSONString, author: ID, template: ID): DocumentConnection
+}
+
+type User implements Node {
+  articles(before: String, after: String, first: Int, last: Int, created: DateTime, id: ID, values: JSONString, author: ID, template: ID): DocumentConnection
+
+  # The ID of the object.
+  id: ID!
+
+  #
+  password: String!
+
+  #
+  roles: [String]
+
+  #
+  username: String!
+}
+
+# An object with an ID
+interface Node {
+  # The ID of the object.
+  id: ID!
+}
+
+type DocumentConnection {
+  # Pagination data for this connection.
+  pageInfo: PageInfo!
+
+  # Contains the nodes in this connection.
+  edges: [DocumentEdge]!
+}
+
+# The Relay compliant `PageInfo` type, containing data necessary to paginate this connection.
+type PageInfo {
+  # When paginating forwards, are there more items?
+  hasNextPage: Boolean!
+
+  # When paginating backwards, are there more items?
+  hasPreviousPage: Boolean!
+
+  # When paginating backwards, the cursor to continue.
+  startCursor: String
+
+  # When paginating forwards, the cursor to continue.
+  endCursor: String
+}
+
+# A Relay edge containing a `Document` and its cursor.
+type DocumentEdge {
+  # The item at the end of the edge
+  node: Document
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+type Document implements Node {
+  #
+  author: User
+
+  #
+  created: DateTime!
+
+  # The ID of the object.
+  id: ID!
+
+  #
+  template: Template
+
+  #
+  values: JSONString!
+
+  #
+  contents: [DocumentSection]
+}
+
+# The `DateTime` scalar type represents a DateTime
+# value as specified by
+# [iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+scalar DateTime
+
+type Template implements Node {
+  #
+  created: DateTime!
+
+  # The ID of the object.
+  id: ID!
+
+  #
+  contents: [TemplateSection]!
+}
+
+type TemplateSection {
+  #
+  defaultParams: JSONString
+
+  #
+  name: String!
+
+  #
+  renderType: String!
+}
+
+# Allows use of a JSON String for input / output from the GraphQL schema.
+#
+# Use of this type is *not recommended* as you lose the benefits of having a defined, static
+# schema (one of the key benefits of GraphQL).
+scalar JSONString
+
+type DocumentSection {
+  #
+  defaultParams: JSONString
+
+  #
+  name: String!
+
+  #
+  renderType: String!
+}
+
+type UserConnection {
+  # Pagination data for this connection.
+  pageInfo: PageInfo!
+
+  # Contains the nodes in this connection.
+  edges: [UserEdge]!
+}
+
+# A Relay edge containing a `User` and its cursor.
+type UserEdge {
+  # The item at the end of the edge
+  node: User
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+type TemplateConnection {
+  # Pagination data for this connection.
+  pageInfo: PageInfo!
+
+  # Contains the nodes in this connection.
+  edges: [TemplateEdge]!
+}
+
+# A Relay edge containing a `Template` and its cursor.
+type TemplateEdge {
+  # The item at the end of the edge
+  node: Template
+
+  # A cursor for use in pagination
+  cursor: String!
 }
 
 type Mutation {
-  userCreate: String
+  login(password: String!, username: String!): LoginMutationResult
+  userCreate(password: String!, username: String!): UserCreateMutationResult
+  documentCreate: DocumentCreateMutationResult
+}
+
+union LoginMutationResult = MutationFail | Login
+
+type MutationFail {
+  errors: [Error!]
+}
+
+type Error {
+  message: String!
+  path: [String!]!
+}
+
+type Login {
+  refreshToken: String
+  accessToken: String
+}
+
+union UserCreateMutationResult = MutationFail | UserCreate
+
+type UserCreate {
+  user: User
+}
+
+union DocumentCreateMutationResult = MutationFail | DocumentCreate
+
+type DocumentCreate {
+  document: Document
 }

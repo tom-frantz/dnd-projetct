@@ -1,16 +1,13 @@
-from graphene import ObjectType, Mutation, String
+from graphene import ObjectType
 
+from graph.mutations.auth import Login
+from graph.mutations.user import UserCreate
 
-class UserCreate(Mutation):
-    class Arguments:
-        pass
-
-    Output = String
-
-    @staticmethod
-    def mutate(info, *args):
-        return "123"
+from graph.mutations.documents import DocumentCreate
 
 
 class Mutation(ObjectType):
+    login = Login.Field()
+
     user_create = UserCreate.Field()
+    document_create = DocumentCreate.Field()
