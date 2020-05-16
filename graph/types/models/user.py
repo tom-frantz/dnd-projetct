@@ -8,7 +8,6 @@ from mongoengine import (
 
 
 class UserModel(Document):
-
     meta = {}
 
     username = StringField(required=True, unique=True)

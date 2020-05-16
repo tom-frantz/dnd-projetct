@@ -1,5 +1,5 @@
-from graphene import Node, ID
-from graphene_mongo import MongoengineObjectType, MongoengineConnectionField
+from graphene import Node
+from graphene_mongo import MongoengineObjectType
 
 from graph.types.models.user import UserModel
 

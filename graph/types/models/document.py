@@ -5,22 +5,17 @@ from mongoengine import (
     ReferenceField,
     DateTimeField,
     DictField,
-    EmbeddedDocumentListField,
     EmbeddedDocument,
     StringField,
     ListField,
     EmbeddedDocumentField,
 )
-from mongoengine.base import DocumentMetaclass
 
 
 class DocumentSectionModel(EmbeddedDocument):
     name = StringField(required=True)
     render_type = StringField(required=True)
     default_params = DictField(default=dict)
-
-    # def serialize(self):
-    #     return "{},{},{}"
 
 
 class DocumentModel(Document):
