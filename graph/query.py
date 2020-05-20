@@ -1,4 +1,4 @@
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_current_user
 from graphene import (
     ObjectType,
     Field,
@@ -22,7 +22,7 @@ class Query(ObjectType):
 
     @jwt_required
     def resolve_me(*args):
-        return UserModel.objects(username=get_jwt_identity()).first()
+        return get_current_user()
 
     def resolve_user(root, info, id):
         _, id = Node.from_global_id(id)

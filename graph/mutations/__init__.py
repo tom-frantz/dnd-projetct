@@ -8,6 +8,8 @@ class MutationFail(ObjectType):
 
 
 class BaseMutation(Mutation):
+    Fail = MutationFail
+
     def __init_subclass__(cls, **kwargs):
         old_mutate = cls.mutate
         success_output = getattr(cls, cls.__name__)
@@ -16,7 +18,6 @@ class BaseMutation(Mutation):
         new_success_output = type(cls.__name__, (success_output,), {})
         setattr(cls, cls.__name__, new_success_output)
         cls.Success = new_success_output
-        cls.Fail = MutationFail
 
         # Add to the union
         class UnionMeta:

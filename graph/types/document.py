@@ -7,7 +7,7 @@ from graph.types.utils.connection import CustomConnectionField
 
 class DocumentConnectionField(CustomConnectionField):
     class Meta:
-        exclude_fields = ("contents",)
+        exclude_fields = ("contents", "template")
 
 
 class Document(MongoengineObjectType):

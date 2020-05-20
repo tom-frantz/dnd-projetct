@@ -8,6 +8,7 @@ from flask_jwt_extended import JWTManager
 from mongoengine import connect
 
 from graph.schema import schema
+from graph.auth import init_auth
 
 load_dotenv()
 
@@ -19,6 +20,8 @@ jwt = JWTManager(app)
 cors = CORS(app, resources={r"/graphql": {"origins": "*"}})
 
 app.add_url_rule("/graphql", view_func=GraphQLView.as_view("graphql", schema=schema))
+
+init_auth(jwt)
 
 if __name__ == '__main__':
     app.run(debug=True)

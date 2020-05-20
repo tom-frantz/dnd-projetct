@@ -56,7 +56,9 @@ export type QueryTemplatesArgs = {
     first?: Maybe<Scalars["Int"]>;
     last?: Maybe<Scalars["Int"]>;
     created?: Maybe<Scalars["DateTime"]>;
+    description?: Maybe<Scalars["String"]>;
     id?: Maybe<Scalars["ID"]>;
+    title?: Maybe<Scalars["String"]>;
 };
 
 export type QueryDocumentsArgs = {
@@ -65,10 +67,11 @@ export type QueryDocumentsArgs = {
     first?: Maybe<Scalars["Int"]>;
     last?: Maybe<Scalars["Int"]>;
     created?: Maybe<Scalars["DateTime"]>;
+    description?: Maybe<Scalars["String"]>;
     id?: Maybe<Scalars["ID"]>;
+    title?: Maybe<Scalars["String"]>;
     values?: Maybe<Scalars["JSONString"]>;
     author?: Maybe<Scalars["ID"]>;
-    template?: Maybe<Scalars["ID"]>;
 };
 
 export type User = Node & {
@@ -86,10 +89,11 @@ export type UserArticlesArgs = {
     first?: Maybe<Scalars["Int"]>;
     last?: Maybe<Scalars["Int"]>;
     created?: Maybe<Scalars["DateTime"]>;
+    description?: Maybe<Scalars["String"]>;
     id?: Maybe<Scalars["ID"]>;
+    title?: Maybe<Scalars["String"]>;
     values?: Maybe<Scalars["JSONString"]>;
     author?: Maybe<Scalars["ID"]>;
-    template?: Maybe<Scalars["ID"]>;
 };
 
 /** An object with an ID */
@@ -132,26 +136,13 @@ export type Document = Node & {
     __typename?: "Document";
     author?: Maybe<User>;
     created: Scalars["DateTime"];
+    description?: Maybe<Scalars["String"]>;
     /** The ID of the object. */
     id: Scalars["ID"];
-    template?: Maybe<Template>;
+    title: Scalars["String"];
     values: Scalars["JSONString"];
-    contents?: Maybe<Array<Maybe<DocumentSection>>>;
-};
-
-export type Template = Node & {
-    __typename?: "Template";
-    created: Scalars["DateTime"];
-    /** The ID of the object. */
-    id: Scalars["ID"];
-    contents: Array<Maybe<TemplateSection>>;
-};
-
-export type TemplateSection = {
-    __typename?: "TemplateSection";
-    defaultParams?: Maybe<Scalars["JSONString"]>;
-    name: Scalars["String"];
-    renderType: Scalars["String"];
+    contents: Array<Maybe<DocumentSection>>;
+    template: Array<Maybe<TemplateSection>>;
 };
 
 export type DocumentSection = {
@@ -159,6 +150,13 @@ export type DocumentSection = {
     content?: Maybe<Scalars["String"]>;
     name: Scalars["String"];
     params?: Maybe<Scalars["JSONString"]>;
+};
+
+export type TemplateSection = {
+    __typename?: "TemplateSection";
+    defaultParams?: Maybe<Scalars["JSONString"]>;
+    name: Scalars["String"];
+    renderType: Scalars["String"];
 };
 
 export type UserConnection = {
@@ -195,10 +193,22 @@ export type TemplateEdge = {
     cursor: Scalars["String"];
 };
 
+export type Template = Node & {
+    __typename?: "Template";
+    created: Scalars["DateTime"];
+    description?: Maybe<Scalars["String"]>;
+    /** The ID of the object. */
+    id: Scalars["ID"];
+    title: Scalars["String"];
+    contents: Array<Maybe<TemplateSection>>;
+};
+
 export type Mutation = {
     __typename?: "Mutation";
     login?: Maybe<LoginMutationResult>;
     userCreate?: Maybe<UserCreateMutationResult>;
+    userUpdate?: Maybe<UserUpdateMutationResult>;
+    userDelete?: Maybe<UserDeleteMutationResult>;
     documentCreate?: Maybe<DocumentCreateMutationResult>;
 };
 
@@ -208,8 +218,17 @@ export type MutationLoginArgs = {
 };
 
 export type MutationUserCreateArgs = {
+    input?: Maybe<UserInput>;
     password: Scalars["String"];
     username: Scalars["String"];
+};
+
+export type MutationUserUpdateArgs = {
+    input?: Maybe<UserInput>;
+};
+
+export type MutationDocumentCreateArgs = {
+    input?: Maybe<DocumentInput>;
 };
 
 export type LoginMutationResult = MutationFail | Login;
@@ -238,11 +257,50 @@ export type UserCreate = {
     user?: Maybe<User>;
 };
 
+export type UserInput = {
+    roles?: Maybe<Array<Maybe<Scalars["String"]>>>;
+};
+
+export type UserUpdateMutationResult = MutationFail | UserUpdate;
+
+export type UserUpdate = {
+    __typename?: "UserUpdate";
+    user?: Maybe<User>;
+};
+
+export type UserDeleteMutationResult = MutationFail | UserDelete;
+
+export type UserDelete = {
+    __typename?: "UserDelete";
+    user?: Maybe<User>;
+};
+
 export type DocumentCreateMutationResult = MutationFail | DocumentCreate;
 
 export type DocumentCreate = {
     __typename?: "DocumentCreate";
     document?: Maybe<Document>;
+};
+
+export type DocumentInput = {
+    title?: Maybe<Scalars["String"]>;
+    description?: Maybe<Scalars["String"]>;
+    author?: Maybe<Scalars["ID"]>;
+    values?: Maybe<Scalars["JSONString"]>;
+    contents?: Maybe<Array<DocumentSectionInput>>;
+    template?: Maybe<Array<TemplateSectionInput>>;
+};
+
+export type DocumentSectionInput = {
+    name?: Maybe<Scalars["String"]>;
+    params?: Maybe<Scalars["JSONString"]>;
+    content?: Maybe<Scalars["String"]>;
+};
+
+export type TemplateSectionInput = {
+    name?: Maybe<Scalars["String"]>;
+    renderType?: Maybe<Scalars["String"]>;
+    defaultParams?: Maybe<Scalars["JSONString"]>;
 };
 
 export type MeQueryVariables = {};
@@ -341,6 +399,30 @@ const result: IntrospectionResultData = {
                     },
                     {
                         name: "UserCreate",
+                    },
+                ],
+            },
+            {
+                kind: "UNION",
+                name: "UserUpdateMutationResult",
+                possibleTypes: [
+                    {
+                        name: "MutationFail",
+                    },
+                    {
+                        name: "UserUpdate",
+                    },
+                ],
+            },
+            {
+                kind: "UNION",
+                name: "UserDeleteMutationResult",
+                possibleTypes: [
+                    {
+                        name: "MutationFail",
+                    },
+                    {
+                        name: "UserDelete",
                     },
                 ],
             },

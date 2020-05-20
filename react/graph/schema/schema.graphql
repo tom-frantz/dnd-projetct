@@ -2,12 +2,12 @@ type Query {
   me: User
   user(id: ID!): User
   users(before: String, after: String, first: Int, last: Int, id: ID, roles: String, username: String): UserConnection
-  templates(before: String, after: String, first: Int, last: Int, created: DateTime, id: ID): TemplateConnection
-  documents(before: String, after: String, first: Int, last: Int, created: DateTime, id: ID, values: JSONString, author: ID, template: ID): DocumentConnection
+  templates(before: String, after: String, first: Int, last: Int, created: DateTime, description: String, id: ID, title: String): TemplateConnection
+  documents(before: String, after: String, first: Int, last: Int, created: DateTime, description: String, id: ID, title: String, values: JSONString, author: ID): DocumentConnection
 }
 
 type User implements Node {
-  articles(before: String, after: String, first: Int, last: Int, created: DateTime, id: ID, values: JSONString, author: ID, template: ID): DocumentConnection
+  articles(before: String, after: String, first: Int, last: Int, created: DateTime, description: String, id: ID, title: String, values: JSONString, author: ID): DocumentConnection
 
   # The ID of the object.
   id: ID!
@@ -64,45 +64,29 @@ type Document implements Node {
   #
   created: DateTime!
 
+  #
+  description: String
+
   # The ID of the object.
   id: ID!
 
   #
-  template: Template
+  title: String!
 
   #
   values: JSONString!
 
   #
-  contents: [DocumentSection]
+  contents: [DocumentSection]!
+
+  #
+  template: [TemplateSection]!
 }
 
 # The `DateTime` scalar type represents a DateTime
 # value as specified by
 # [iso8601](https://en.wikipedia.org/wiki/ISO_8601).
 scalar DateTime
-
-type Template implements Node {
-  #
-  created: DateTime!
-
-  # The ID of the object.
-  id: ID!
-
-  #
-  contents: [TemplateSection]!
-}
-
-type TemplateSection {
-  #
-  defaultParams: JSONString
-
-  #
-  name: String!
-
-  #
-  renderType: String!
-}
 
 # Allows use of a JSON String for input / output from the GraphQL schema.
 #
@@ -119,6 +103,17 @@ type DocumentSection {
 
   #
   params: JSONString
+}
+
+type TemplateSection {
+  #
+  defaultParams: JSONString
+
+  #
+  name: String!
+
+  #
+  renderType: String!
 }
 
 type UserConnection {
@@ -155,10 +150,29 @@ type TemplateEdge {
   cursor: String!
 }
 
+type Template implements Node {
+  #
+  created: DateTime!
+
+  #
+  description: String
+
+  # The ID of the object.
+  id: ID!
+
+  #
+  title: String!
+
+  #
+  contents: [TemplateSection]!
+}
+
 type Mutation {
   login(password: String!, username: String!): LoginMutationResult
-  userCreate(password: String!, username: String!): UserCreateMutationResult
-  documentCreate: DocumentCreateMutationResult
+  userCreate(input: UserInput, password: String!, username: String!): UserCreateMutationResult
+  userUpdate(input: UserInput): UserUpdateMutationResult
+  userDelete: UserDeleteMutationResult
+  documentCreate(input: DocumentInput): DocumentCreateMutationResult
 }
 
 union LoginMutationResult = MutationFail | Login
@@ -183,8 +197,45 @@ type UserCreate {
   user: User
 }
 
+input UserInput {
+  roles: [String]
+}
+
+union UserUpdateMutationResult = MutationFail | UserUpdate
+
+type UserUpdate {
+  user: User
+}
+
+union UserDeleteMutationResult = MutationFail | UserDelete
+
+type UserDelete {
+  user: User
+}
+
 union DocumentCreateMutationResult = MutationFail | DocumentCreate
 
 type DocumentCreate {
   document: Document
+}
+
+input DocumentInput {
+  title: String
+  description: String
+  author: ID
+  values: JSONString
+  contents: [DocumentSectionInput!]
+  template: [TemplateSectionInput!]
+}
+
+input DocumentSectionInput {
+  name: String
+  params: JSONString
+  content: String
+}
+
+input TemplateSectionInput {
+  name: String
+  renderType: String
+  defaultParams: JSONString
 }

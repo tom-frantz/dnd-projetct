@@ -19,6 +19,9 @@ class TemplateSectionModel(EmbeddedDocument):
 class TemplateModel(Document):
     meta = {}
 
+    title = StringField(required=True)
+    description = StringField()
+
     created = DateTimeField(required=True, default=datetime.datetime.utcnow)
 
     contents = EmbeddedDocumentListField(

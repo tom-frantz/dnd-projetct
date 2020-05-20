@@ -9,7 +9,10 @@ from mongoengine import (
     StringField,
     ListField,
     EmbeddedDocumentField,
+    EmbeddedDocumentListField,
 )
+
+from graph.types.models.template import TemplateSectionModel
 
 
 class DocumentSectionModel(EmbeddedDocument):
@@ -21,9 +24,16 @@ class DocumentSectionModel(EmbeddedDocument):
 class DocumentModel(Document):
     meta = {}
 
-    contents = ListField(EmbeddedDocumentField("DocumentSectionModel"))
+    title = StringField(required=True)
+    description = StringField()
+
     author = ReferenceField("UserModel", required=True)
     created = DateTimeField(required=True, default=datetime.datetime.utcnow)
 
-    template = ReferenceField("TemplateModel", required=True)
+    contents = EmbeddedDocumentListField(
+        DocumentSectionModel, default=list, required=True
+    )
+    template = EmbeddedDocumentListField(
+        TemplateSectionModel, default=list, required=True
+    )
     values = DictField(required=True, default=dict)
