@@ -1,10 +1,5 @@
-from flask_jwt_extended import jwt_required, get_jwt_identity, get_current_user
-from graphene import (
-    ObjectType,
-    Field,
-    ID,
-    Node,
-)
+from flask_jwt_extended import jwt_required, get_current_user
+from graphene import ObjectType, Field, ID, Node
 from graphene_mongo import MongoengineConnectionField
 
 from graph.types.document import Document, DocumentConnectionField

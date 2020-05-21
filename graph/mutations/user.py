@@ -4,6 +4,7 @@ from graphql_relay import from_global_id
 from passlib.handlers.pbkdf2 import pbkdf2_sha256
 
 from graph.mutations import BaseMutation
+from graph.subscriptions.user import update_user_subscribers
 from graph.types.inputs.user import UserInput
 from graph.types.user import User
 from graph.types.models.user import UserModel
@@ -42,6 +43,8 @@ class UserUpdate(BaseMutation):
         user = get_current_user()
         user.modify(**input)
         user.save()
+
+        update_user_subscribers(user)
 
         return UserUpdate.Success(user=user)
 
