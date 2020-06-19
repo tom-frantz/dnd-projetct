@@ -7,7 +7,9 @@
     "mutationType": {
       "name": "Mutation"
     },
-    "subscriptionType": null,
+    "subscriptionType": {
+      "name": "Subscription"
+    },
     "types": [
       {
         "kind": "SCALAR",
@@ -334,16 +336,6 @@
                 "defaultValue": null
               },
               {
-                "name": "values",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "JSONString",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
                 "name": "author",
                 "description": null,
                 "type": {
@@ -357,6 +349,33 @@
             "type": {
               "kind": "OBJECT",
               "name": "DocumentConnection",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "document",
+            "description": null,
+            "args": [
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Document",
               "ofType": null
             },
             "isDeprecated": false,
@@ -473,16 +492,6 @@
                 "type": {
                   "kind": "SCALAR",
                   "name": "String",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "values",
-                "description": null,
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "JSONString",
                   "ofType": null
                 },
                 "defaultValue": null
@@ -840,22 +849,6 @@
             "deprecationReason": null
           },
           {
-            "name": "values",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "JSONString",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "contents",
             "description": "",
             "args": [],
@@ -868,26 +861,6 @@
                 "ofType": {
                   "kind": "OBJECT",
                   "name": "DocumentSection",
-                  "ofType": null
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "template",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "OBJECT",
-                  "name": "TemplateSection",
                   "ofType": null
                 }
               }
@@ -918,22 +891,24 @@
         "possibleTypes": null
       },
       {
-        "kind": "SCALAR",
-        "name": "JSONString",
-        "description": "Allows use of a JSON String for input / output from the GraphQL schema.\n\nUse of this type is *not recommended* as you lose the benefits of having a defined, static\nschema (one of the key benefits of GraphQL).",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
         "kind": "OBJECT",
         "name": "DocumentSection",
         "description": null,
         "fields": [
           {
             "name": "content",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "description",
             "description": "",
             "args": [],
             "type": {
@@ -961,13 +936,29 @@
             "deprecationReason": null
           },
           {
-            "name": "params",
+            "name": "template",
             "description": "",
             "args": [],
             "type": {
-              "kind": "SCALAR",
-              "name": "JSONString",
+              "kind": "OBJECT",
+              "name": "TemplateSection",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "values",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "INTERFACE",
+                "name": "Value",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -985,6 +976,18 @@
         "fields": [
           {
             "name": "defaultParams",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "JSONString",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "defaultValues",
             "description": "",
             "args": [],
             "type": {
@@ -1032,6 +1035,66 @@
         "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
+      },
+      {
+        "kind": "SCALAR",
+        "name": "JSONString",
+        "description": "Allows use of a JSON String for input / output from the GraphQL schema.\n\nUse of this type is *not recommended* as you lose the benefits of having a defined, static\nschema (one of the key benefits of GraphQL).",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INTERFACE",
+        "name": "Value",
+        "description": null,
+        "fields": [
+          {
+            "name": "name",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "description",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "NumericValue",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "NumericRuleValue",
+            "ofType": null
+          }
+        ]
       },
       {
         "kind": "OBJECT",
@@ -1342,7 +1405,34 @@
             ],
             "type": {
               "kind": "UNION",
-              "name": "LoginMutationResult",
+              "name": "LoginResult",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "refresh",
+            "description": null,
+            "args": [
+              {
+                "name": "refreshToken",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "UNION",
+              "name": "RefreshResult",
               "ofType": null
             },
             "isDeprecated": false,
@@ -1393,7 +1483,7 @@
             ],
             "type": {
               "kind": "UNION",
-              "name": "UserCreateMutationResult",
+              "name": "UserCreateResult",
               "ofType": null
             },
             "isDeprecated": false,
@@ -1416,7 +1506,7 @@
             ],
             "type": {
               "kind": "UNION",
-              "name": "UserUpdateMutationResult",
+              "name": "UserUpdateResult",
               "ofType": null
             },
             "isDeprecated": false,
@@ -1428,7 +1518,7 @@
             "args": [],
             "type": {
               "kind": "UNION",
-              "name": "UserDeleteMutationResult",
+              "name": "UserDeleteResult",
               "ofType": null
             },
             "isDeprecated": false,
@@ -1447,11 +1537,25 @@
                   "ofType": null
                 },
                 "defaultValue": null
+              },
+              {
+                "name": "template",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
               }
             ],
             "type": {
               "kind": "UNION",
-              "name": "DocumentCreateMutationResult",
+              "name": "DocumentCreateResult",
               "ofType": null
             },
             "isDeprecated": false,
@@ -1465,7 +1569,7 @@
       },
       {
         "kind": "UNION",
-        "name": "LoginMutationResult",
+        "name": "LoginResult",
         "description": null,
         "fields": null,
         "inputFields": null,
@@ -1576,9 +1680,13 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -1588,9 +1696,13 @@
             "description": null,
             "args": [],
             "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -1603,7 +1715,55 @@
       },
       {
         "kind": "UNION",
-        "name": "UserCreateMutationResult",
+        "name": "RefreshResult",
+        "description": null,
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "MutationFail",
+            "ofType": null
+          },
+          {
+            "kind": "OBJECT",
+            "name": "Refresh",
+            "ofType": null
+          }
+        ]
+      },
+      {
+        "kind": "OBJECT",
+        "name": "Refresh",
+        "description": null,
+        "fields": [
+          {
+            "name": "accessToken",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "UNION",
+        "name": "UserCreateResult",
         "description": null,
         "fields": null,
         "inputFields": null,
@@ -1672,7 +1832,7 @@
       },
       {
         "kind": "UNION",
-        "name": "UserUpdateMutationResult",
+        "name": "UserUpdateResult",
         "description": null,
         "fields": null,
         "inputFields": null,
@@ -1716,7 +1876,7 @@
       },
       {
         "kind": "UNION",
-        "name": "UserDeleteMutationResult",
+        "name": "UserDeleteResult",
         "description": null,
         "fields": null,
         "inputFields": null,
@@ -1760,7 +1920,7 @@
       },
       {
         "kind": "UNION",
-        "name": "DocumentCreateMutationResult",
+        "name": "DocumentCreateResult",
         "description": null,
         "fields": null,
         "inputFields": null,
@@ -1968,6 +2128,292 @@
           }
         ],
         "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "Subscription",
+        "description": null,
+        "fields": [
+          {
+            "name": "documentUpdate",
+            "description": null,
+            "args": [
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Document",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "userUpdate",
+            "description": null,
+            "args": [
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "ID",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "User",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "NumericValue",
+        "description": null,
+        "fields": [
+          {
+            "name": "description",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "value",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "Value",
+            "ofType": null
+          }
+        ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "SCALAR",
+        "name": "Float",
+        "description": "The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](https://en.wikipedia.org/wiki/IEEE_floating_point).",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "NumericRuleValue",
+        "description": null,
+        "fields": [
+          {
+            "name": "description",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "String",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "name",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "rules",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Rule",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "value",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "SCALAR",
+              "name": "Float",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [
+          {
+            "kind": "INTERFACE",
+            "name": "Value",
+            "ofType": null
+          },
+          {
+            "kind": "INTERFACE",
+            "name": "RuleValue",
+            "ofType": null
+          }
+        ],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INTERFACE",
+        "name": "RuleValue",
+        "description": null,
+        "fields": [
+          {
+            "name": "rules",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Rule",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": [
+          {
+            "kind": "OBJECT",
+            "name": "NumericRuleValue",
+            "ofType": null
+          }
+        ]
+      },
+      {
+        "kind": "OBJECT",
+        "name": "Rule",
+        "description": null,
+        "fields": [
+          {
+            "name": "rule",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "targetValue",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "String",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
         "enumValues": null,
         "possibleTypes": null
       },

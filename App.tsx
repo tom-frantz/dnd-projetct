@@ -1,66 +1,118 @@
-import React, { useLayoutEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { TextField } from "react-native-material-textfield";
+import React, { useEffect, useState } from "react";
 
-const App: React.FC<{}> = () => {
-    const [loc, setLoc] = useState<{ left: number; top: number } | undefined>(undefined);
+import { ApolloProvider } from "@apollo/react-hooks";
 
-    const [value, setValue] = useState("");
+import { getClient } from "./app/app/client";
+import {
+    AuthContext,
+    getAccessToken,
+    setAccessToken,
+    removeAccessToken,
+    getRefreshToken,
+    setRefreshToken,
+    removeRefreshToken,
+} from "./app/app/auth";
+import LandingScreen from "./app/screens/LandingScreen";
+import { ActivityIndicator, Platform, View } from "react-native";
+import { loadFonts } from "./app/app/fonts";
 
-    return (
-        <View style={styles.container}>
-            <Text>Open up App.js to start working on your app!</Text>
-            <Text
-                onLayout={({ nativeEvent: { layout } }) => {
-                    setLoc({ left: layout.x + layout.width, top: layout.y + layout.height });
-                }}
-            >
-                Hey mang
-            </Text>
-            <TextField
-                label={"hey"}
-                value={value}
-                onChangeText={setValue}
-                // To fix the rest of it for web, make sure to change the line height in the source.
-                labelTextStyle={{ paddingLeft: "33.3333333%" }}
-                // multiline
-                onSelectionChange={({
-                    nativeEvent: {
-                        selection: { start, end },
-                    },
-                }) =>
-                    console.log(
-                        value.substring(0, start) +
-                            "'" +
-                            value.substring(start, end) +
-                            "'" +
-                            value.substring(end)
-                    )
-                }
-            />
-            {loc && (
-                <Text
-                    style={{
-                        position: "absolute",
-                        backgroundColor: "#F00",
-                        left: loc.left - 10,
-                        top: loc.top - 10,
-                    }}
-                >
-                    wowee
-                </Text>
-            )}
-        </View>
-    );
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import LoginScreen from "./app/screens/LoginScreen";
+import DocumentScreen from "./app/screens/DocumentScreen";
+import Text from "./app/components/Text";
+
+export type AppStackParamList = {
+    Login: undefined;
+    Landing: undefined;
+    Document: { id: string };
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#fff",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-});
+const Stack = createStackNavigator<AppStackParamList>();
+
+const App: React.FC = () => {
+    const [loading, setLoading] = useState<boolean>(true);
+    const [accessToken, setReactToken] = useState<string | undefined>(undefined);
+
+    useEffect(() => {
+        Promise.all([
+            loadFonts(),
+            getAccessToken().then((token) => setReactToken(token || undefined)),
+        ]).then(() => {
+            setLoading(false);
+        });
+    }, []);
+
+    if (loading) {
+        return <ActivityIndicator style={{ height: "100%" }} size={"large"} color={"#000"} />;
+    }
+
+    return (
+        <AuthContext.Provider
+            value={{
+                token: accessToken,
+                setTokens: async (token: string, refreshToken: string): Promise<void> => {
+                    await Promise.all([setAccessToken(token), setRefreshToken(refreshToken)]);
+                    setReactToken(token);
+                },
+                clearTokens: async (): Promise<void> => {
+                    await Promise.all([removeAccessToken(), removeRefreshToken()]);
+                    setReactToken(undefined);
+                },
+            }}
+        >
+            <ApolloProvider
+                client={getClient({
+                    getAccessToken: async () => accessToken || null,
+                    getRefreshToken,
+                    setAccessToken: async (token: string) => {
+                        await setReactToken(token);
+                        await setAccessToken(token);
+                    },
+                    setRefreshToken,
+                    removeAccessToken: async () => {
+                        await setReactToken(undefined);
+                        await removeAccessToken();
+                    },
+                    removeRefreshToken,
+                })}
+            >
+                <NavigationContainer
+                    linking={
+                        Platform.OS === "web"
+                            ? {
+                                  prefixes: [],
+                                  config: {
+                                      Login: "login",
+                                      Landing: "landing",
+                                      Document: "document/:id",
+                                  },
+                              }
+                            : undefined
+                    }
+                >
+                    <Stack.Navigator screenOptions={{ header: () => null }}>
+                        {accessToken === undefined && (
+                            <Stack.Screen name={"Login"} component={LoginScreen} />
+                        )}
+                        {accessToken !== undefined && (
+                            <>
+                                <Stack.Screen name={"Landing"} component={LandingScreen} />
+                                <Stack.Screen
+                                    name={"Document"}
+                                    component={DocumentScreen}
+                                    initialParams={{ id: "" }}
+                                />
+                            </>
+                        )}
+                    </Stack.Navigator>
+                    <View style={{ backgroundColor: "#F2F2F2", padding: 13 }}>
+                        <Text>DnD Tracker - Tom Frantz</Text>
+                    </View>
+                </NavigationContainer>
+            </ApolloProvider>
+        </AuthContext.Provider>
+    );
+};
 
 export default App;

@@ -1,0 +1,35 @@
+[{
+  "contents": [
+    {
+      "name": "Stats",
+      "values": [
+        {
+          "name": "Dexterity",
+          "value": 10
+        }
+      ]
+    },
+    {
+      "name": "Proficiency Section",
+      "values": [
+        {
+          "name": "Dex Mod",
+          "rules": [
+            {
+              "target": "Dex Mod",
+              "rule": "rd((Dexterity - 10) / 2)"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+},
+{
+  "contents":[],
+  "externalRules": [{
+    "target": "Armor Class",
+    "rule": "2",
+    "modifier": true
+  }]
+}]

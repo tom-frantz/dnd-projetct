@@ -16,7 +16,7 @@ from graph.overrides import (
 
 from graph.schema import schema
 from graph.auth import init_auth
-
+from graph.types.document import document_middleware
 
 load_dotenv()
 
@@ -29,7 +29,12 @@ cors = CORS(app, resources={r"/graphql": {"origins": "*"}})
 
 app.add_url_rule(
     "/graphql",
-    view_func=OverriddenView.as_view("graphql", schema=schema, backend=CustomBackend()),
+    view_func=OverriddenView.as_view(
+        "graphql",
+        schema=schema,
+        backend=CustomBackend(),
+        middleware=[document_middleware],
+    ),
 )
 
 sockets = Sockets(app)
@@ -49,6 +54,6 @@ if __name__ == '__main__':
     from gevent import pywsgi
     from geventwebsocket.handler import WebSocketHandler
 
-    server = pywsgi.WSGIServer(('127.0.0.1', 5000), app, handler_class=WebSocketHandler)
+    server = pywsgi.WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler)
     print("Running on localhost (127.0.0.1:5000)")
     server.serve_forever()

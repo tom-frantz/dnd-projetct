@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "HelloWorld",
-    "slug": "dndProjetct",
+    "name": "DnD Tracker",
+    "slug": "dndProject",
     "platforms": [
       "ios",
       "android",

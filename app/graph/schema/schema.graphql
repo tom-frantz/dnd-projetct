@@ -3,11 +3,12 @@ type Query {
   user(id: ID!): User
   users(before: String, after: String, first: Int, last: Int, id: ID, roles: String, username: String): UserConnection
   templates(before: String, after: String, first: Int, last: Int, created: DateTime, description: String, id: ID, title: String): TemplateConnection
-  documents(before: String, after: String, first: Int, last: Int, created: DateTime, description: String, id: ID, title: String, values: JSONString, author: ID): DocumentConnection
+  documents(before: String, after: String, first: Int, last: Int, created: DateTime, description: String, id: ID, title: String, author: ID): DocumentConnection
+  document(id: ID!): Document
 }
 
 type User implements Node {
-  articles(before: String, after: String, first: Int, last: Int, created: DateTime, description: String, id: ID, title: String, values: JSONString, author: ID): DocumentConnection
+  articles(before: String, after: String, first: Int, last: Int, created: DateTime, description: String, id: ID, title: String, author: ID): DocumentConnection
 
   # The ID of the object.
   id: ID!
@@ -74,13 +75,7 @@ type Document implements Node {
   title: String!
 
   #
-  values: JSONString!
-
-  #
   contents: [DocumentSection]!
-
-  #
-  template: [TemplateSection]!
 }
 
 # The `DateTime` scalar type represents a DateTime
@@ -88,21 +83,19 @@ type Document implements Node {
 # [iso8601](https://en.wikipedia.org/wiki/ISO_8601).
 scalar DateTime
 
-# Allows use of a JSON String for input / output from the GraphQL schema.
-#
-# Use of this type is *not recommended* as you lose the benefits of having a defined, static
-# schema (one of the key benefits of GraphQL).
-scalar JSONString
-
 type DocumentSection {
   #
   content: String
 
   #
+  description: String
+
+  #
   name: String!
 
   #
-  params: JSONString
+  template: TemplateSection
+  values: [Value]
 }
 
 type TemplateSection {
@@ -110,10 +103,24 @@ type TemplateSection {
   defaultParams: JSONString
 
   #
+  defaultValues: JSONString
+
+  #
   name: String!
 
   #
   renderType: String!
+}
+
+# Allows use of a JSON String for input / output from the GraphQL schema.
+#
+# Use of this type is *not recommended* as you lose the benefits of having a defined, static
+# schema (one of the key benefits of GraphQL).
+scalar JSONString
+
+interface Value {
+  name: String!
+  description: String
 }
 
 type UserConnection {
@@ -168,14 +175,15 @@ type Template implements Node {
 }
 
 type Mutation {
-  login(password: String!, username: String!): LoginMutationResult
-  userCreate(input: UserInput, password: String!, username: String!): UserCreateMutationResult
-  userUpdate(input: UserInput): UserUpdateMutationResult
-  userDelete: UserDeleteMutationResult
-  documentCreate(input: DocumentInput): DocumentCreateMutationResult
+  login(password: String!, username: String!): LoginResult
+  refresh(refreshToken: String!): RefreshResult
+  userCreate(input: UserInput, password: String!, username: String!): UserCreateResult
+  userUpdate(input: UserInput): UserUpdateResult
+  userDelete: UserDeleteResult
+  documentCreate(input: DocumentInput, template: ID!): DocumentCreateResult
 }
 
-union LoginMutationResult = MutationFail | Login
+union LoginResult = MutationFail | Login
 
 type MutationFail {
   errors: [Error!]
@@ -187,11 +195,17 @@ type Error {
 }
 
 type Login {
-  refreshToken: String
-  accessToken: String
+  refreshToken: String!
+  accessToken: String!
 }
 
-union UserCreateMutationResult = MutationFail | UserCreate
+union RefreshResult = MutationFail | Refresh
+
+type Refresh {
+  accessToken: String!
+}
+
+union UserCreateResult = MutationFail | UserCreate
 
 type UserCreate {
   user: User
@@ -201,19 +215,19 @@ input UserInput {
   roles: [String]
 }
 
-union UserUpdateMutationResult = MutationFail | UserUpdate
+union UserUpdateResult = MutationFail | UserUpdate
 
 type UserUpdate {
   user: User
 }
 
-union UserDeleteMutationResult = MutationFail | UserDelete
+union UserDeleteResult = MutationFail | UserDelete
 
 type UserDelete {
   user: User
 }
 
-union DocumentCreateMutationResult = MutationFail | DocumentCreate
+union DocumentCreateResult = MutationFail | DocumentCreate
 
 type DocumentCreate {
   document: Document
@@ -238,4 +252,34 @@ input TemplateSectionInput {
   name: String
   renderType: String
   defaultParams: JSONString
+}
+
+type Subscription {
+  documentUpdate(id: ID!): Document
+  userUpdate(id: ID!): User
+}
+
+type NumericValue implements Value {
+  description: String
+  name: String!
+  value: Float
+}
+
+type NumericRuleValue implements Value & RuleValue {
+  description: String
+  name: String!
+  rules: [Rule]
+  value: Float
+}
+
+interface RuleValue {
+  rules: [Rule]
+}
+
+type Rule {
+  #
+  rule: String!
+
+  #
+  targetValue: String!
 }

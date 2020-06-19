@@ -1,17 +1,17 @@
 overwrite: true
 schema: "http://127.0.0.1:5000/graphql"
-documents: "react/graph/**/*.ts"
+documents: "app/graph/**/*.ts"
 generates:
-  react/graph/graphql.tsx:
+  app/graph/graphql.tsx:
     plugins:
       - "typescript"
       - "typescript-operations"
       - "typescript-react-apollo"
       - "fragment-matcher"
-  react/graph/schema/graphql.schema.json:
+  app/graph/schema/graphql.schema.json:
     plugins:
       - "introspection"
-  react/graph/schema/schema.graphql:
+  app/graph/schema/schema.graphql:
     plugins:
       - "schema-ast"
     config:

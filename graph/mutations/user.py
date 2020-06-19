@@ -41,6 +41,7 @@ class UserUpdate(BaseMutation):
         # print(get_jwt_identity()["id"])
         # user = UserModel.objects(id=get_jwt_identity()["id"]).first()
         user = get_current_user()
+        # TODO recalculate all the values based on the rule engine.
         user.modify(**input)
         user.save()
 

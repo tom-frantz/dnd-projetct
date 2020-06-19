@@ -5,8 +5,11 @@ from graph.types.inputs.template import TemplateSectionInput
 
 class DocumentSectionInput(InputObjectType):
     name = String()
-    params = JSONString()
+    description = String()
+
     content = String()
+    # TODO Other values
+    # params = JSONString()
 
 
 class DocumentInput(InputObjectType):
@@ -14,7 +17,8 @@ class DocumentInput(InputObjectType):
     description = String()
     author = ID()
 
-    values = JSONString()
+    # TODO Other values
+    # values = JSONString()
 
     contents = List(NonNull(DocumentSectionInput))
-    template = List(NonNull(TemplateSectionInput))
+    # template = List(NonNull(TemplateSectionInput))

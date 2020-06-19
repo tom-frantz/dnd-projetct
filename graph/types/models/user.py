@@ -4,6 +4,8 @@ from mongoengine import (
     ListField,
     StringField,
     ReferenceField,
+    PULL,
+    CASCADE,
 )
 
 
@@ -14,4 +16,4 @@ class UserModel(Document):
     password = StringField(required=True)
     roles = ListField(StringField(), default=[])
 
-    articles = ListField(ReferenceField("DocumentModel"))
+    articles = ListField(ReferenceField("DocumentModel", reverse_delete_rule=PULL))

@@ -1,6 +1,11 @@
 import itertools
 
-from flask_jwt_extended import jwt_required, get_jwt_claims, get_jwt_identity
+from flask_jwt_extended import (
+    jwt_required,
+    get_jwt_claims,
+    get_jwt_identity,
+    current_user,
+)
 from graphene import ID, ObjectType, Field
 from graphql_relay import from_global_id
 
@@ -13,47 +18,96 @@ from graph.types.models.document import DocumentModel, DocumentSectionModel
 from graph.types.utils.error import Error
 
 
-class DocumentCreate(BaseMutation):
-    class Arguments:
-        input = DocumentInput()
-        template = ID(required=True)
+# TODO FIX
+# class DocumentCreate(BaseMutation):
+#     class Arguments:
+#         input = DocumentInput()
+#         template = ID(required=True)
+#
+#     class DocumentCreate(ObjectType):
+#         document = Field(Document)
+#
+#     @staticmethod
+#     @jwt_required
+#     def mutate(root, info, input, template):
+#         author = UserModel.objects(id=get_jwt_identity()["id"]).first()
+#         template = TemplateModel.objects(id=from_global_id(template)[1])
+#
+#         if not template:
+#             DocumentCreate.Fail(
+#                 [Error("The template could not be found", ["template"])]
+#             )
+#
+#         template_contents = [
+#             template_section
+#             for template_section in itertools.chain(
+#                 template.contents,
+#                 [
+#                     TemplateSectionModel(**template_section_input)
+#                     for template_section_input in input.get("template", [])
+#                 ],
+#             )
+#         ]
+#
+#         del input["template"]
+#
+#         document_contents = [
+#             DocumentSectionModel(**document_section_input)
+#             for document_section_input in input.get("contents", [])
+#         ]
+#
+#         document = DocumentModel(author=author, template=template_contents, **input)
+#         document.save()
+#
+#         author.articles.append(document)
+#         author.save()
+#
+#         return DocumentCreate.Success(document)
 
-    class DocumentCreate(ObjectType):
+
+class DocumentUpdate(BaseMutation):
+    class Arguments:
+        id = ID(required=True)
+        input = DocumentInput(required=True)
+
+    class DocumentUpdate(ObjectType):
         document = Field(Document)
 
-    @staticmethod
     @jwt_required
-    def mutate(root, info, input, template):
-        author = UserModel.objects(id=get_jwt_identity()["id"]).first()
-        template = TemplateModel.objects(id=from_global_id(template)[1])
+    def mutate(root, info, input, id):
+        mapped_fields = {}
+        doc = DocumentModel.objects(id=id).first()
 
-        if not template:
-            DocumentCreate.Fail(
-                [Error("The template could not be found", ["template"])]
+        if current_user.id != doc.author.id:
+            return DocumentUpdate.Fail(
+                errors=[
+                    Error(message="You do not have permission to edit this document")
+                ]
             )
 
-        template_contents = [
-            template_section
-            for template_section in itertools.chain(
-                template.contents,
-                [
-                    TemplateSectionModel(**template_section_input)
-                    for template_section_input in input.get("template", [])
-                ],
+        if dict(input) == dict():
+            return DocumentUpdate.Success(document=doc)
+
+        # TODO make the lambda a bit more robust.
+        if input.contents is not None:
+            contents = list(
+                map(
+                    lambda content_input: DocumentSectionModel(
+                        **content_input,
+                        values=[],
+                        template=TemplateSectionModel(
+                            name="TextSection",  # This should be the same as the parent DocumentSection name.
+                            render_type="TextSection",
+                            default_params={},
+                            default_values={},
+                        ),
+                    ),
+                    input.contents,
+                )
             )
-        ]
 
-        del input["template"]
+            input["contents"] = contents
 
-        document_contents = [
-            DocumentSectionModel(**document_section_input)
-            for document_section_input in input.get("contents", [])
-        ]
+        doc.modify(**input)
 
-        document = DocumentModel(author=author, template=template_contents, **input)
-        document.save()
-
-        author.articles.append(document)
-        author.save()
-
-        return DocumentCreate.Success(document)
+        return DocumentUpdate.Success(document=doc)

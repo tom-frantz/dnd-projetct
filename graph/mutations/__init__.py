@@ -24,13 +24,11 @@ class BaseMutation(Mutation):
             types = (MutationFail, new_success_output)
 
         # Set the output to be the union type
-        cls.Output = type(
-            cls.__name__ + "MutationResult", (Union,), {"Meta": UnionMeta}
-        )
+        cls.Output = type(cls.__name__ + "Result", (Union,), {"Meta": UnionMeta})
 
         def new_mutate(*args, **kwargs):
             if "id" in kwargs:
-                kwargs["id"] = Node.from_global_id(kwargs["id"])
+                kwargs["id"] = Node.from_global_id(kwargs["id"])[1]
             return old_mutate(*args, **kwargs)
 
         cls.mutate = new_mutate
