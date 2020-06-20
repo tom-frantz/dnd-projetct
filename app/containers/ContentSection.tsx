@@ -1,63 +1,61 @@
-import React, { useContext, useState } from "react";
-import Text from "../components/Text";
-import { StyleProp, View, ViewStyle } from "react-native";
+import React, { useContext } from "react";
+import { View } from "react-native";
 import { Icon } from "react-native-elements";
 import { EditingContext } from "../utils/EditingContext";
 import EditText from "../components/EditText";
+import { ThemeContext } from "../utils/ThemeContext";
+import Section from "../components/Section";
 
 interface ContentSectionProps {
+    // Content sections
     name: string;
     description?: string;
     content?: string;
-    style?: StyleProp<ViewStyle>;
+
+    fieldName: string; // Name for formik field props.
+
+    last?: boolean;
+    removeSection(): void;
 }
 
 const ContentSection: React.FC<ContentSectionProps> = (props: ContentSectionProps) => {
-    const { name, description, content, style } = props;
-    const [editing, setEditing] = useState<boolean>(false);
+    const { headingFont } = useContext(ThemeContext);
+    const { name, description, content, fieldName, last, removeSection } = props;
+
+    const { editing } = useContext(EditingContext);
 
     return (
-        <EditingContext.Provider value={{ editing }}>
-            <View
-                style={[
-                    {
-                        borderColor: "#F2F2F2",
-                        backgroundColor: "#FFF",
-                        marginVertical: 13,
-                        padding: 13,
-                        marginHorizontal: 0,
-                    },
-                    style,
-                ]}
-            >
-                <View style={{ flexDirection: "row", alignContent: "center" }}>
-                    <View style={{ flexWrap: "wrap", flexDirection: "row", flex: 1 }}>
-                        <Text style={{ width: "fit-content", marginRight: 13 }} heading>
-                            {name}
-                        </Text>
+        <Section last={last}>
+            <View style={{ flexDirection: "row", alignContent: "center" }}>
+                <View style={{ flexWrap: "wrap", flexDirection: "row", flex: 1 }}>
+                    <EditText
+                        style={[headingFont]}
+                        fieldName={`${fieldName}.name`}
+                        nonEditStyle={{ marginRight: 13 }}
+                        value={name}
+                    />
 
-                        <Text
-                            style={{
-                                width: "fit-content",
-                                alignSelf: "flex-end",
-                                paddingBottom: 6,
-                            }}
-                            bold
-                        >
-                            {description}
-                        </Text>
-                    </View>
-                    <Icon
-                        name={"settings"}
-                        type={"material"}
-                        style={{ alignSelf: "flex-start" }}
-                        onPress={() => setEditing(!editing)}
-                        containerStyle={{ alignSelf: "flex-start", marginLeft: 13 }}
+                    <EditText
+                        style={{ fontWeight: "bold", alignSelf: "flex-end" }}
+                        nonEditStyle={{ marginBottom: 6 }}
+                        fieldName={`${fieldName}.description`}
+                        value={description}
                     />
                 </View>
-                <EditText fieldName={"123"} value={content} />
+                {editing && (
+                    <>
+                        <Icon
+                            name={"delete"}
+                            type={"material"}
+                            style={{ alignSelf: "flex-start" }}
+                            onPress={removeSection}
+                            containerStyle={{ alignSelf: "flex-start", marginLeft: 13 }}
+                        />
+                    </>
+                )}
             </View>
-        </EditingContext.Provider>
+            <EditText fieldName={`${fieldName}.content`} value={content} />
+        </Section>
     );
 };
 

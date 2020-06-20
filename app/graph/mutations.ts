@@ -26,3 +26,27 @@ const refresh = gql`
         }
     }
 `;
+
+const documentUpdate = gql`
+    mutation documentUpdate($id: ID!, $input: DocumentInput!) {
+        documentUpdate(id: $id, input: $input) {
+            __typename
+            ... on DocumentUpdate {
+                document {
+                    id
+                    title
+                    description
+                    created
+                    author {
+                        id
+                    }
+                    contents {
+                        name
+                        description
+                        content
+                    }
+                }
+            }
+        }
+    }
+`;

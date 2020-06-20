@@ -13,18 +13,18 @@ export type Scalars = {
     Int: number;
     Float: number;
     /**
-     * The `DateTime` scalar type represents a DateTime
-     * value as specified by
-     * [iso8601](https://en.wikipedia.org/wiki/ISO_8601).
-     */
-    DateTime: any;
-    /**
      * Allows use of a JSON String for input / output from the GraphQL schema.
      *
      * Use of this type is *not recommended* as you lose the benefits of having a defined, static
      * schema (one of the key benefits of GraphQL).
      */
     JSONString: any;
+    /**
+     * The `DateTime` scalar type represents a DateTime
+     * value as specified by
+     * [iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+     */
+    DateTime: any;
 };
 
 export type Query = {
@@ -138,12 +138,12 @@ export type DocumentEdge = {
 export type Document = Node & {
     __typename?: "Document";
     author?: Maybe<User>;
+    contents: Array<DocumentSection>;
     created: Scalars["DateTime"];
     description?: Maybe<Scalars["String"]>;
     /** The ID of the object. */
     id: Scalars["ID"];
     title: Scalars["String"];
-    contents: Array<Maybe<DocumentSection>>;
 };
 
 export type DocumentSection = {
@@ -219,7 +219,7 @@ export type Mutation = {
     userCreate?: Maybe<UserCreateResult>;
     userUpdate?: Maybe<UserUpdateResult>;
     userDelete?: Maybe<UserDeleteResult>;
-    documentCreate?: Maybe<DocumentCreateResult>;
+    documentUpdate?: Maybe<DocumentUpdateResult>;
 };
 
 export type MutationLoginArgs = {
@@ -241,9 +241,9 @@ export type MutationUserUpdateArgs = {
     input?: Maybe<UserInput>;
 };
 
-export type MutationDocumentCreateArgs = {
-    input?: Maybe<DocumentInput>;
-    template: Scalars["ID"];
+export type MutationDocumentUpdateArgs = {
+    id: Scalars["ID"];
+    input: DocumentInput;
 };
 
 export type LoginResult = MutationFail | Login;
@@ -297,10 +297,10 @@ export type UserDelete = {
     user?: Maybe<User>;
 };
 
-export type DocumentCreateResult = MutationFail | DocumentCreate;
+export type DocumentUpdateResult = MutationFail | DocumentUpdate;
 
-export type DocumentCreate = {
-    __typename?: "DocumentCreate";
+export type DocumentUpdate = {
+    __typename?: "DocumentUpdate";
     document?: Maybe<Document>;
 };
 
@@ -308,21 +308,13 @@ export type DocumentInput = {
     title?: Maybe<Scalars["String"]>;
     description?: Maybe<Scalars["String"]>;
     author?: Maybe<Scalars["ID"]>;
-    values?: Maybe<Scalars["JSONString"]>;
     contents?: Maybe<Array<DocumentSectionInput>>;
-    template?: Maybe<Array<TemplateSectionInput>>;
 };
 
 export type DocumentSectionInput = {
     name?: Maybe<Scalars["String"]>;
-    params?: Maybe<Scalars["JSONString"]>;
+    description?: Maybe<Scalars["String"]>;
     content?: Maybe<Scalars["String"]>;
-};
-
-export type TemplateSectionInput = {
-    name?: Maybe<Scalars["String"]>;
-    renderType?: Maybe<Scalars["String"]>;
-    defaultParams?: Maybe<Scalars["JSONString"]>;
 };
 
 export type Subscription = {
@@ -390,6 +382,33 @@ export type RefreshMutation = { __typename?: "Mutation" } & {
     >;
 };
 
+export type DocumentUpdateMutationVariables = {
+    id: Scalars["ID"];
+    input: DocumentInput;
+};
+
+export type DocumentUpdateMutation = { __typename?: "Mutation" } & {
+    documentUpdate?: Maybe<
+        | { __typename: "MutationFail" }
+        | ({ __typename: "DocumentUpdate" } & {
+              document?: Maybe<
+                  { __typename?: "Document" } & Pick<
+                      Document,
+                      "id" | "title" | "description" | "created"
+                  > & {
+                          author?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                          contents: Array<
+                              { __typename?: "DocumentSection" } & Pick<
+                                  DocumentSection,
+                                  "name" | "description" | "content"
+                              >
+                          >;
+                      }
+              >;
+          })
+    >;
+};
+
 export type MeQueryVariables = {};
 
 export type MeQuery = { __typename?: "Query" } & {
@@ -406,21 +425,19 @@ export type MeQuery = { __typename?: "Query" } & {
                                             "id" | "created" | "title" | "description"
                                         > & {
                                                 contents: Array<
-                                                    Maybe<
-                                                        { __typename?: "DocumentSection" } & Pick<
-                                                            DocumentSection,
-                                                            "name" | "content" | "description"
-                                                        > & {
-                                                                template?: Maybe<
-                                                                    {
-                                                                        __typename?: "TemplateSection";
-                                                                    } & Pick<
-                                                                        TemplateSection,
-                                                                        "name" | "renderType"
-                                                                    >
-                                                                >;
-                                                            }
-                                                    >
+                                                    { __typename?: "DocumentSection" } & Pick<
+                                                        DocumentSection,
+                                                        "name" | "content" | "description"
+                                                    > & {
+                                                            template?: Maybe<
+                                                                {
+                                                                    __typename?: "TemplateSection";
+                                                                } & Pick<
+                                                                    TemplateSection,
+                                                                    "name" | "renderType"
+                                                                >
+                                                            >;
+                                                        }
                                                 >;
                                             }
                                     >;
@@ -441,11 +458,9 @@ export type DocumentQuery = { __typename?: "Query" } & {
     document?: Maybe<
         { __typename?: "Document" } & Pick<Document, "id" | "title" | "description" | "created"> & {
                 contents: Array<
-                    Maybe<
-                        { __typename?: "DocumentSection" } & Pick<
-                            DocumentSection,
-                            "name" | "description" | "content"
-                        >
+                    { __typename?: "DocumentSection" } & Pick<
+                        DocumentSection,
+                        "name" | "description" | "content"
                     >
                 >;
             }
@@ -565,6 +580,78 @@ export type RefreshMutationResult = ApolloReactCommon.MutationResult<RefreshMuta
 export type RefreshMutationOptions = ApolloReactCommon.BaseMutationOptions<
     RefreshMutation,
     RefreshMutationVariables
+>;
+export const DocumentUpdateDocument = gql`
+    mutation documentUpdate($id: ID!, $input: DocumentInput!) {
+        documentUpdate(id: $id, input: $input) {
+            __typename
+            ... on DocumentUpdate {
+                document {
+                    id
+                    title
+                    description
+                    created
+                    author {
+                        id
+                    }
+                    contents {
+                        name
+                        description
+                        content
+                    }
+                }
+            }
+        }
+    }
+`;
+export type DocumentUpdateMutationFn = ApolloReactCommon.MutationFunction<
+    DocumentUpdateMutation,
+    DocumentUpdateMutationVariables
+>;
+export type DocumentUpdateComponentProps = Omit<
+    ApolloReactComponents.MutationComponentOptions<
+        DocumentUpdateMutation,
+        DocumentUpdateMutationVariables
+    >,
+    "mutation"
+>;
+
+export const DocumentUpdateComponent = (props: DocumentUpdateComponentProps) => (
+    <ApolloReactComponents.Mutation<DocumentUpdateMutation, DocumentUpdateMutationVariables>
+        mutation={DocumentUpdateDocument}
+        {...props}
+    />
+);
+
+export type DocumentUpdateProps<TChildProps = {}, TDataName extends string = "mutate"> = {
+    [key in TDataName]: ApolloReactCommon.MutationFunction<
+        DocumentUpdateMutation,
+        DocumentUpdateMutationVariables
+    >;
+} &
+    TChildProps;
+export function withDocumentUpdate<TProps, TChildProps = {}, TDataName extends string = "mutate">(
+    operationOptions?: ApolloReactHoc.OperationOption<
+        TProps,
+        DocumentUpdateMutation,
+        DocumentUpdateMutationVariables,
+        DocumentUpdateProps<TChildProps, TDataName>
+    >
+) {
+    return ApolloReactHoc.withMutation<
+        TProps,
+        DocumentUpdateMutation,
+        DocumentUpdateMutationVariables,
+        DocumentUpdateProps<TChildProps, TDataName>
+    >(DocumentUpdateDocument, {
+        alias: "documentUpdate",
+        ...operationOptions,
+    });
+}
+export type DocumentUpdateMutationResult = ApolloReactCommon.MutationResult<DocumentUpdateMutation>;
+export type DocumentUpdateMutationOptions = ApolloReactCommon.BaseMutationOptions<
+    DocumentUpdateMutation,
+    DocumentUpdateMutationVariables
 >;
 export const MeDocument = gql`
     query me {
@@ -783,13 +870,13 @@ const result: IntrospectionResultData = {
             },
             {
                 kind: "UNION",
-                name: "DocumentCreateResult",
+                name: "DocumentUpdateResult",
                 possibleTypes: [
                     {
                         name: "MutationFail",
                     },
                     {
-                        name: "DocumentCreate",
+                        name: "DocumentUpdate",
                     },
                 ],
             },

@@ -32,31 +32,36 @@ const LandingScreen: React.FC<LandingScreenProps> = (props: LandingScreenProps) 
 
     return (
         <View style={styles.container}>
-            <Text title>{username}</Text>
-            <Text heading>Articles</Text>
-            <View style={{ paddingLeft: 13 }}>
-                {articles &&
-                    articles.edges.map((edge) => {
-                        if (edge == undefined || edge.node == undefined) {
-                            return null;
-                        }
-                        return (
-                            <View key={edge.node.id}>
-                                <Text
-                                    subheading
-                                    onPress={() => {
-                                        navigation.navigate("Document", {
-                                            id: (edge.node as { id: string }).id,
-                                        });
-                                    }}
-                                    style={{ textDecorationLine: "underline" }}
-                                >
-                                    {edge.node.title}
-                                </Text>
-                                <Text>{edge.node.description}</Text>
-                            </View>
-                        );
-                    })}
+            <View style={[styles.sectionStyle, styles.firstSection]}>
+                <Text title>{username}</Text>
+            </View>
+
+            <View style={styles.sectionStyle}>
+                <Text heading>Articles</Text>
+                <View style={{ paddingLeft: 13 }}>
+                    {articles &&
+                        articles.edges.map((edge) => {
+                            if (edge == undefined || edge.node == undefined) {
+                                return null;
+                            }
+                            return (
+                                <View key={edge.node.id}>
+                                    <Text
+                                        subheading
+                                        onPress={() => {
+                                            navigation.navigate("Document", {
+                                                id: (edge.node as { id: string }).id,
+                                            });
+                                        }}
+                                        style={{ textDecorationLine: "underline" }}
+                                    >
+                                        {edge.node.title}
+                                    </Text>
+                                    <Text>{edge.node.description}</Text>
+                                </View>
+                            );
+                        })}
+                </View>
             </View>
         </View>
     );
@@ -66,10 +71,16 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         display: "flex",
-        margin: 13,
         padding: 13,
-        borderRadius: 13,
-        backgroundColor: "#fff",
+    },
+    sectionStyle: {
+        backgroundColor: "#FFF",
+        padding: 13,
+        marginBottom: 13,
+    },
+    firstSection: {
+        borderTopRightRadius: 13,
+        borderTopLeftRadius: 13,
     },
 });
 

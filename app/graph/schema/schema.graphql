@@ -61,6 +61,7 @@ type DocumentEdge {
 type Document implements Node {
   #
   author: User
+  contents: [DocumentSection!]!
 
   #
   created: DateTime!
@@ -73,15 +74,7 @@ type Document implements Node {
 
   #
   title: String!
-
-  #
-  contents: [DocumentSection]!
 }
-
-# The `DateTime` scalar type represents a DateTime
-# value as specified by
-# [iso8601](https://en.wikipedia.org/wiki/ISO_8601).
-scalar DateTime
 
 type DocumentSection {
   #
@@ -122,6 +115,11 @@ interface Value {
   name: String!
   description: String
 }
+
+# The `DateTime` scalar type represents a DateTime
+# value as specified by
+# [iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+scalar DateTime
 
 type UserConnection {
   # Pagination data for this connection.
@@ -180,7 +178,7 @@ type Mutation {
   userCreate(input: UserInput, password: String!, username: String!): UserCreateResult
   userUpdate(input: UserInput): UserUpdateResult
   userDelete: UserDeleteResult
-  documentCreate(input: DocumentInput, template: ID!): DocumentCreateResult
+  documentUpdate(id: ID!, input: DocumentInput!): DocumentUpdateResult
 }
 
 union LoginResult = MutationFail | Login
@@ -227,9 +225,9 @@ type UserDelete {
   user: User
 }
 
-union DocumentCreateResult = MutationFail | DocumentCreate
+union DocumentUpdateResult = MutationFail | DocumentUpdate
 
-type DocumentCreate {
+type DocumentUpdate {
   document: Document
 }
 
@@ -237,21 +235,13 @@ input DocumentInput {
   title: String
   description: String
   author: ID
-  values: JSONString
   contents: [DocumentSectionInput!]
-  template: [TemplateSectionInput!]
 }
 
 input DocumentSectionInput {
   name: String
-  params: JSONString
+  description: String
   content: String
-}
-
-input TemplateSectionInput {
-  name: String
-  renderType: String
-  defaultParams: JSONString
 }
 
 type Subscription {

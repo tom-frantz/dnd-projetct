@@ -13,7 +13,7 @@ import {
     removeRefreshToken,
 } from "./app/app/auth";
 import LandingScreen from "./app/screens/LandingScreen";
-import { ActivityIndicator, Platform, View } from "react-native";
+import { ActivityIndicator, Platform, ScrollView, TouchableOpacity, View } from "react-native";
 import { loadFonts } from "./app/app/fonts";
 
 import { NavigationContainer } from "@react-navigation/native";
@@ -21,6 +21,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import LoginScreen from "./app/screens/LoginScreen";
 import DocumentScreen from "./app/screens/DocumentScreen";
 import Text from "./app/components/Text";
+import Navbar from "./app/containers/Navbar";
 
 export type AppStackParamList = {
     Login: undefined;
@@ -66,8 +67,8 @@ const App: React.FC = () => {
                     getAccessToken: async () => accessToken || null,
                     getRefreshToken,
                     setAccessToken: async (token: string) => {
-                        await setReactToken(token);
                         await setAccessToken(token);
+                        await setReactToken(token);
                     },
                     setRefreshToken,
                     removeAccessToken: async () => {
@@ -77,6 +78,7 @@ const App: React.FC = () => {
                     removeRefreshToken,
                 })}
             >
+                {/*<ScrollView contentContainerStyle={{flex: 1}} style={{flex: 1}}>*/}
                 <NavigationContainer
                     linking={
                         Platform.OS === "web"
@@ -91,7 +93,7 @@ const App: React.FC = () => {
                             : undefined
                     }
                 >
-                    <Stack.Navigator screenOptions={{ header: () => null }}>
+                    <Stack.Navigator screenOptions={{ header: Navbar }}>
                         {accessToken === undefined && (
                             <Stack.Screen name={"Login"} component={LoginScreen} />
                         )}
@@ -110,6 +112,7 @@ const App: React.FC = () => {
                         <Text>DnD Tracker - Tom Frantz</Text>
                     </View>
                 </NavigationContainer>
+                {/*</ScrollView>*/}
             </ApolloProvider>
         </AuthContext.Provider>
     );

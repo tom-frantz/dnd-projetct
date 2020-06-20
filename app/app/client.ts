@@ -78,7 +78,7 @@ const createClient = (values: ClientValues): ApolloClient<any> => {
                                                 },
                                             });
                                             console.log(operation.getContext().headers);
-                                            forward(operation);
+                                            setTimeout(() => forward(operation), 0);
                                         });
                                     } else {
                                         removeRefreshToken();

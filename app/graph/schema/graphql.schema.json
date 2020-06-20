@@ -789,6 +789,30 @@
             "deprecationReason": null
           },
           {
+            "name": "contents",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "LIST",
+                "name": null,
+                "ofType": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "DocumentSection",
+                    "ofType": null
+                  }
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "created",
             "description": "",
             "args": [],
@@ -847,26 +871,6 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
-          },
-          {
-            "name": "contents",
-            "description": "",
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "OBJECT",
-                  "name": "DocumentSection",
-                  "ofType": null
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -877,16 +881,6 @@
             "ofType": null
           }
         ],
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "SCALAR",
-        "name": "DateTime",
-        "description": "The `DateTime` scalar type represents a DateTime\nvalue as specified by\n[iso8601](https://en.wikipedia.org/wiki/ISO_8601).",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -1095,6 +1089,16 @@
             "ofType": null
           }
         ]
+      },
+      {
+        "kind": "SCALAR",
+        "name": "DateTime",
+        "description": "The `DateTime` scalar type represents a DateTime\nvalue as specified by\n[iso8601](https://en.wikipedia.org/wiki/ISO_8601).",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
       },
       {
         "kind": "OBJECT",
@@ -1525,21 +1529,11 @@
             "deprecationReason": null
           },
           {
-            "name": "documentCreate",
+            "name": "documentUpdate",
             "description": null,
             "args": [
               {
-                "name": "input",
-                "description": null,
-                "type": {
-                  "kind": "INPUT_OBJECT",
-                  "name": "DocumentInput",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "template",
+                "name": "id",
                 "description": null,
                 "type": {
                   "kind": "NON_NULL",
@@ -1551,11 +1545,25 @@
                   }
                 },
                 "defaultValue": null
+              },
+              {
+                "name": "input",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "DocumentInput",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null
               }
             ],
             "type": {
               "kind": "UNION",
-              "name": "DocumentCreateResult",
+              "name": "DocumentUpdateResult",
               "ofType": null
             },
             "isDeprecated": false,
@@ -1920,7 +1928,7 @@
       },
       {
         "kind": "UNION",
-        "name": "DocumentCreateResult",
+        "name": "DocumentUpdateResult",
         "description": null,
         "fields": null,
         "inputFields": null,
@@ -1934,14 +1942,14 @@
           },
           {
             "kind": "OBJECT",
-            "name": "DocumentCreate",
+            "name": "DocumentUpdate",
             "ofType": null
           }
         ]
       },
       {
         "kind": "OBJECT",
-        "name": "DocumentCreate",
+        "name": "DocumentUpdate",
         "description": null,
         "fields": [
           {
@@ -1999,16 +2007,6 @@
             "defaultValue": null
           },
           {
-            "name": "values",
-            "description": null,
-            "type": {
-              "kind": "SCALAR",
-              "name": "JSONString",
-              "ofType": null
-            },
-            "defaultValue": null
-          },
-          {
             "name": "contents",
             "description": null,
             "type": {
@@ -2020,24 +2018,6 @@
                 "ofType": {
                   "kind": "INPUT_OBJECT",
                   "name": "DocumentSectionInput",
-                  "ofType": null
-                }
-              }
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "template",
-            "description": null,
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "INPUT_OBJECT",
-                  "name": "TemplateSectionInput",
                   "ofType": null
                 }
               }
@@ -2066,11 +2046,11 @@
             "defaultValue": null
           },
           {
-            "name": "params",
+            "name": "description",
             "description": null,
             "type": {
               "kind": "SCALAR",
-              "name": "JSONString",
+              "name": "String",
               "ofType": null
             },
             "defaultValue": null
@@ -2081,47 +2061,6 @@
             "type": {
               "kind": "SCALAR",
               "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null
-          }
-        ],
-        "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "INPUT_OBJECT",
-        "name": "TemplateSectionInput",
-        "description": null,
-        "fields": null,
-        "inputFields": [
-          {
-            "name": "name",
-            "description": null,
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "renderType",
-            "description": null,
-            "type": {
-              "kind": "SCALAR",
-              "name": "String",
-              "ofType": null
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "defaultParams",
-            "description": null,
-            "type": {
-              "kind": "SCALAR",
-              "name": "JSONString",
               "ofType": null
             },
             "defaultValue": null

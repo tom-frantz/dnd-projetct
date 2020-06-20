@@ -25,13 +25,6 @@ def document_middleware(next, root, info, **args):
     return next(root, info, **args)
 
 
-class Document(MongoengineObjectType):
-    class Meta:
-        connection_field_class = DocumentConnectionField
-        model = DocumentModel
-        interfaces = (Node,)
-
-
 class DocumentSection(MongoengineObjectType):
     class Meta:
         model = DocumentSectionModel
@@ -42,3 +35,12 @@ class DocumentSection(MongoengineObjectType):
     @staticmethod
     def resolve_values(root, info):
         return [get_value_from_model(value) for value in root.values]
+
+
+class Document(MongoengineObjectType):
+    class Meta:
+        connection_field_class = DocumentConnectionField
+        model = DocumentModel
+        interfaces = (Node,)
+
+    contents = NonNull(List(NonNull(DocumentSection)))
