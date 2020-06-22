@@ -1,5 +1,3 @@
-import datetime
-
 from flask_jwt_extended import (
     create_refresh_token,
     create_access_token,
@@ -39,9 +37,7 @@ class Login(BaseMutation):
 
         return Login.Success(
             refresh_token=create_refresh_token(user),
-            access_token=create_access_token(
-                user, expires_delta=datetime.timedelta(seconds=1)
-            ),
+            access_token=create_access_token(user),
             user=user,
         )
 
@@ -59,9 +55,7 @@ class Refresh(BaseMutation):
             token = decode_token(refresh_token)
             current_user = user_loader_callback(token["identity"])
             return Refresh.Success(
-                access_token=create_access_token(
-                    identity=current_user, expires_delta=datetime.timedelta(seconds=1)
-                )
+                access_token=create_access_token(identity=current_user)
             )
         except Exception as e:
             return Refresh.Fail(errors=[])
