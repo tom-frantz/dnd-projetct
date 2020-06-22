@@ -1,0 +1,63 @@
+# serverless.yml
+
+service: serverless-flask
+
+package:
+  exclude:
+    - node_modules/**
+    - venv/**
+    - tests/**
+    - .*/**
+    - app/**
+    - assets/**
+    - web-build/**
+    - scripts/**
+    - yarn.lock
+    - README.md
+    - App.tsx
+    - '*.cfg'
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-python-requirements
+  - serverless-wsgi
+#  - serverless-domain-manager
+
+custom:
+  dotenv:
+    path: ./.env.production
+    include:
+      - SECRET_KEY
+      - CONNECTION_STRING
+  wsgi:
+    app: app.application
+    packRequirements: false
+  pythonRequirements:
+    noDeploy:
+      - typing
+    dockerizePip: non-linux
+    layer:
+      name: ${self:provider.stage}-bakelistRuntime
+      description: Bakelist requirements lambda layer
+      compatibleRuntimes:
+        - python3.8
+      allowedAccounts:
+        - '*'
+  customDomain:
+    domainName: nothing.something.com.au
+    stage: ${self:provider.stage}
+    createRoute53Record: false
+
+provider:
+  name: aws
+  runtime: python3.8
+  stage: prod
+  region: us-east-1
+
+functions:
+  app:
+    handler: wsgi_handler.handler
+    layers:
+      - {Ref: PythonRequirementsLambdaLayer}
+    events:
+      - http: ANY /graphql

@@ -219,6 +219,7 @@ export type Mutation = {
     userCreate?: Maybe<UserCreateResult>;
     userUpdate?: Maybe<UserUpdateResult>;
     userDelete?: Maybe<UserDeleteResult>;
+    documentCreate?: Maybe<DocumentCreateResult>;
     documentUpdate?: Maybe<DocumentUpdateResult>;
 };
 
@@ -239,6 +240,10 @@ export type MutationUserCreateArgs = {
 
 export type MutationUserUpdateArgs = {
     input?: Maybe<UserInput>;
+};
+
+export type MutationDocumentCreateArgs = {
+    input: DocumentInput;
 };
 
 export type MutationDocumentUpdateArgs = {
@@ -263,6 +268,7 @@ export type Login = {
     __typename?: "Login";
     refreshToken: Scalars["String"];
     accessToken: Scalars["String"];
+    user: User;
 };
 
 export type RefreshResult = MutationFail | Refresh;
@@ -276,7 +282,9 @@ export type UserCreateResult = MutationFail | UserCreate;
 
 export type UserCreate = {
     __typename?: "UserCreate";
-    user?: Maybe<User>;
+    user: User;
+    refreshToken: Scalars["String"];
+    accessToken: Scalars["String"];
 };
 
 export type UserInput = {
@@ -297,11 +305,11 @@ export type UserDelete = {
     user?: Maybe<User>;
 };
 
-export type DocumentUpdateResult = MutationFail | DocumentUpdate;
+export type DocumentCreateResult = MutationFail | DocumentCreate;
 
-export type DocumentUpdate = {
-    __typename?: "DocumentUpdate";
-    document?: Maybe<Document>;
+export type DocumentCreate = {
+    __typename?: "DocumentCreate";
+    document: Document;
 };
 
 export type DocumentInput = {
@@ -315,6 +323,13 @@ export type DocumentSectionInput = {
     name?: Maybe<Scalars["String"]>;
     description?: Maybe<Scalars["String"]>;
     content?: Maybe<Scalars["String"]>;
+};
+
+export type DocumentUpdateResult = MutationFail | DocumentUpdate;
+
+export type DocumentUpdate = {
+    __typename?: "DocumentUpdate";
+    document?: Maybe<Document>;
 };
 
 export type Subscription = {
@@ -367,7 +382,9 @@ export type LoginMutation = { __typename?: "Mutation" } & {
         | ({ __typename?: "MutationFail" } & {
               errors?: Maybe<Array<{ __typename?: "Error" } & Pick<Error, "message" | "path">>>;
           })
-        | ({ __typename?: "Login" } & Pick<Login, "refreshToken" | "accessToken">)
+        | ({ __typename?: "Login" } & Pick<Login, "refreshToken" | "accessToken"> & {
+                  user: { __typename?: "User" } & Pick<User, "id">;
+              })
     >;
 };
 
@@ -405,6 +422,31 @@ export type DocumentUpdateMutation = { __typename?: "Mutation" } & {
                           >;
                       }
               >;
+          })
+    >;
+};
+
+export type RegisterMutationVariables = {
+    password: Scalars["String"];
+    username: Scalars["String"];
+};
+
+export type RegisterMutation = { __typename?: "Mutation" } & {
+    userCreate?: Maybe<
+        | ({ __typename?: "MutationFail" } & {
+              errors?: Maybe<Array<{ __typename?: "Error" } & Pick<Error, "message" | "path">>>;
+          })
+        | ({ __typename?: "UserCreate" } & Pick<UserCreate, "accessToken" | "refreshToken">)
+    >;
+};
+
+export type CreateNewDocumentMutationVariables = {};
+
+export type CreateNewDocumentMutation = { __typename?: "Mutation" } & {
+    documentCreate?: Maybe<
+        | { __typename: "MutationFail" }
+        | ({ __typename: "DocumentCreate" } & {
+              document: { __typename?: "Document" } & Pick<Document, "id">;
           })
     >;
 };
@@ -473,6 +515,9 @@ export const LoginDocument = gql`
             ... on Login {
                 refreshToken
                 accessToken
+                user {
+                    id
+                }
             }
             ... on MutationFail {
                 errors {
@@ -652,6 +697,135 @@ export type DocumentUpdateMutationResult = ApolloReactCommon.MutationResult<Docu
 export type DocumentUpdateMutationOptions = ApolloReactCommon.BaseMutationOptions<
     DocumentUpdateMutation,
     DocumentUpdateMutationVariables
+>;
+export const RegisterDocument = gql`
+    mutation register($password: String!, $username: String!) {
+        userCreate(password: $password, username: $username) {
+            ... on UserCreate {
+                accessToken
+                refreshToken
+            }
+            ... on MutationFail {
+                errors {
+                    message
+                    path
+                }
+            }
+        }
+    }
+`;
+export type RegisterMutationFn = ApolloReactCommon.MutationFunction<
+    RegisterMutation,
+    RegisterMutationVariables
+>;
+export type RegisterComponentProps = Omit<
+    ApolloReactComponents.MutationComponentOptions<RegisterMutation, RegisterMutationVariables>,
+    "mutation"
+>;
+
+export const RegisterComponent = (props: RegisterComponentProps) => (
+    <ApolloReactComponents.Mutation<RegisterMutation, RegisterMutationVariables>
+        mutation={RegisterDocument}
+        {...props}
+    />
+);
+
+export type RegisterProps<TChildProps = {}, TDataName extends string = "mutate"> = {
+    [key in TDataName]: ApolloReactCommon.MutationFunction<
+        RegisterMutation,
+        RegisterMutationVariables
+    >;
+} &
+    TChildProps;
+export function withRegister<TProps, TChildProps = {}, TDataName extends string = "mutate">(
+    operationOptions?: ApolloReactHoc.OperationOption<
+        TProps,
+        RegisterMutation,
+        RegisterMutationVariables,
+        RegisterProps<TChildProps, TDataName>
+    >
+) {
+    return ApolloReactHoc.withMutation<
+        TProps,
+        RegisterMutation,
+        RegisterMutationVariables,
+        RegisterProps<TChildProps, TDataName>
+    >(RegisterDocument, {
+        alias: "register",
+        ...operationOptions,
+    });
+}
+export type RegisterMutationResult = ApolloReactCommon.MutationResult<RegisterMutation>;
+export type RegisterMutationOptions = ApolloReactCommon.BaseMutationOptions<
+    RegisterMutation,
+    RegisterMutationVariables
+>;
+export const CreateNewDocumentDocument = gql`
+    mutation createNewDocument {
+        documentCreate(input: { title: "Untitled Document" }) {
+            __typename
+            ... on DocumentCreate {
+                document {
+                    id
+                }
+            }
+        }
+    }
+`;
+export type CreateNewDocumentMutationFn = ApolloReactCommon.MutationFunction<
+    CreateNewDocumentMutation,
+    CreateNewDocumentMutationVariables
+>;
+export type CreateNewDocumentComponentProps = Omit<
+    ApolloReactComponents.MutationComponentOptions<
+        CreateNewDocumentMutation,
+        CreateNewDocumentMutationVariables
+    >,
+    "mutation"
+>;
+
+export const CreateNewDocumentComponent = (props: CreateNewDocumentComponentProps) => (
+    <ApolloReactComponents.Mutation<CreateNewDocumentMutation, CreateNewDocumentMutationVariables>
+        mutation={CreateNewDocumentDocument}
+        {...props}
+    />
+);
+
+export type CreateNewDocumentProps<TChildProps = {}, TDataName extends string = "mutate"> = {
+    [key in TDataName]: ApolloReactCommon.MutationFunction<
+        CreateNewDocumentMutation,
+        CreateNewDocumentMutationVariables
+    >;
+} &
+    TChildProps;
+export function withCreateNewDocument<
+    TProps,
+    TChildProps = {},
+    TDataName extends string = "mutate"
+>(
+    operationOptions?: ApolloReactHoc.OperationOption<
+        TProps,
+        CreateNewDocumentMutation,
+        CreateNewDocumentMutationVariables,
+        CreateNewDocumentProps<TChildProps, TDataName>
+    >
+) {
+    return ApolloReactHoc.withMutation<
+        TProps,
+        CreateNewDocumentMutation,
+        CreateNewDocumentMutationVariables,
+        CreateNewDocumentProps<TChildProps, TDataName>
+    >(CreateNewDocumentDocument, {
+        alias: "createNewDocument",
+        ...operationOptions,
+    });
+}
+export type CreateNewDocumentMutationResult = ApolloReactCommon.MutationResult<
+    CreateNewDocumentMutation
+>;
+export type CreateNewDocumentMutationOptions = ApolloReactCommon.BaseMutationOptions<
+    CreateNewDocumentMutation,
+    CreateNewDocumentMutationVariables
 >;
 export const MeDocument = gql`
     query me {
@@ -865,6 +1039,18 @@ const result: IntrospectionResultData = {
                     },
                     {
                         name: "UserDelete",
+                    },
+                ],
+            },
+            {
+                kind: "UNION",
+                name: "DocumentCreateResult",
+                possibleTypes: [
+                    {
+                        name: "MutationFail",
+                    },
+                    {
+                        name: "DocumentCreate",
                     },
                 ],
             },

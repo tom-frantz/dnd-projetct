@@ -63,6 +63,11 @@
     "@types/yup": "^0.29.3",
     "babel-preset-expo": "~8.1.0",
     "prettier": "^2.0.5",
+    "serverless-domain-manager": "^4.1.1",
+    "serverless-dotenv-plugin": "^2.4.2",
+    "serverless-python-requirements": "^5.1.0",
+    "serverless-s3-sync": "^1.14.3",
+    "serverless-wsgi": "^1.7.5",
     "typescript": "^3.9.2"
   },
   "private": true

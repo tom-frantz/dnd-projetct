@@ -2,6 +2,8 @@ aniso8601==7.0.0
 base36==0.1.1
 cffi==1.14.0
 click==7.1.2
+dnspython==1.16.0
+dnspython3==1.15.0
 Flask==1.1.2
 Flask-Cors==3.0.8
 Flask-GraphQL==2.0.1

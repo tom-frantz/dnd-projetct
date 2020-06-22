@@ -6,6 +6,9 @@ const login = gql`
             ... on Login {
                 refreshToken
                 accessToken
+                user {
+                    id
+                }
             }
             ... on MutationFail {
                 errors {
@@ -45,6 +48,36 @@ const documentUpdate = gql`
                         description
                         content
                     }
+                }
+            }
+        }
+    }
+`;
+
+const register = gql`
+    mutation register($password: String!, $username: String!) {
+        userCreate(password: $password, username: $username) {
+            ... on UserCreate {
+                accessToken
+                refreshToken
+            }
+            ... on MutationFail {
+                errors {
+                    message
+                    path
+                }
+            }
+        }
+    }
+`;
+
+const createNewDocument = gql`
+    mutation createNewDocument {
+        documentCreate(input: { title: "Untitled Document" }) {
+            __typename
+            ... on DocumentCreate {
+                document {
+                    id
                 }
             }
         }

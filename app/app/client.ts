@@ -1,4 +1,4 @@
-import { from } from "apollo-link";
+import { from, Observable, fromPromise } from "apollo-link";
 import { InMemoryCache, IntrospectionFragmentMatcher } from "apollo-cache-inmemory";
 import { setContext } from "apollo-link-context";
 import { ApolloClient } from "apollo-client";
@@ -7,6 +7,7 @@ import { createUploadLink } from "apollo-upload-client";
 import introspectionQueryResultData from "../graph/graphql";
 import { RefreshDocument, RefreshMutation, RefreshMutationVariables } from "../graph/graphql";
 import { Platform } from "react-native";
+import { load } from "dotenv";
 // import { showMessage, hideMessage } from "react-native-flash-message";
 
 interface ClientValues {
@@ -21,8 +22,13 @@ interface ClientValues {
 
 // const { endpoint } = getEnvVars();
 // TODO CHANGE FOR IOS SUPPORT TOO.
-export const uri =
-    Platform.OS === "web" ? "http://localhost:5000/graphql" : "http://192.168.20.20:5000/graphql";
+export const uri = __DEV__
+    ? Platform.OS === "web"
+        ? "http://localhost:5000/graphql"
+        : "http://192.168.20.20:5000/graphql"
+    : "https://c29rm8ehti.execute-api.us-east-1.amazonaws.com/prod/graphql";
+
+console.log(uri);
 
 let client: ApolloClient<any> | undefined = undefined;
 
@@ -43,9 +49,11 @@ const createClient = (values: ClientValues): ApolloClient<any> => {
         removeAccessToken,
         removeRefreshToken,
     } = values;
+
     const errorLink = onError(({ graphQLErrors, networkError, forward, operation }) => {
         if (graphQLErrors) {
-            graphQLErrors.map(({ message, locations, path }) => {
+            for (const error of graphQLErrors) {
+                const { message, locations, path } = error;
                 console.warn(
                     `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
                 );
@@ -53,46 +61,57 @@ const createClient = (values: ClientValues): ApolloClient<any> => {
                 if (message === "Signature has expired") {
                     console.warn(" ... Refreshing token ... ");
 
-                    getRefreshToken().then((value) => {
-                        if (value != null) {
-                            getClient(values)
-                                .mutate<RefreshMutation, RefreshMutationVariables>({
+                    return new Observable((observer) => {
+                        const refreshAccessToken = async () => {
+                            const removeBothTokens = async () => {
+                                await Promise.all([removeRefreshToken(), removeAccessToken()]);
+                            };
+
+                            try {
+                                const refreshToken = await getRefreshToken();
+                                if (refreshToken === null) {
+                                    return await removeBothTokens();
+                                }
+
+                                const { data } = await getClient(values).mutate<
+                                    RefreshMutation,
+                                    RefreshMutationVariables
+                                >({
                                     mutation: RefreshDocument,
                                     variables: {
-                                        refreshToken: value,
+                                        refreshToken,
                                     },
-                                })
-                                .then(({ data }) => {
-                                    console.log(" ... Refresh Query ... ");
-                                    console.log(data);
-                                    if (data?.refresh?.__typename === "Refresh") {
-                                        console.log(" ... Token Refreshed ... ");
-                                        const token = data.refresh.accessToken;
-                                        setAccessToken(data.refresh.accessToken).then(() => {
-                                            const oldHeaders = operation.getContext().headers;
-                                            console.log("Old Headers", oldHeaders);
-                                            operation.setContext({
-                                                headers: {
-                                                    ...oldHeaders,
-                                                    authorization: `Bearer ${token}`,
-                                                },
-                                            });
-                                            console.log(operation.getContext().headers);
-                                            setTimeout(() => forward(operation), 0);
-                                        });
-                                    } else {
-                                        removeRefreshToken();
-                                        removeAccessToken();
-                                    }
-                                })
-                                .catch(() => {
-                                    removeRefreshToken();
-                                    removeAccessToken();
                                 });
-                        } else {
-                            removeRefreshToken();
-                            removeAccessToken();
-                        }
+
+                                if (data?.refresh?.__typename === "Refresh") {
+                                    await setAccessToken(data.refresh.accessToken);
+
+                                    const oldHeaders = operation.getContext().headers;
+                                    operation.setContext({
+                                        headers: {
+                                            ...oldHeaders,
+                                            authorization: `Bearer ${data.refresh.accessToken}`,
+                                        },
+                                    });
+
+                                    const subscriber = {
+                                        next: observer.next.bind(observer),
+                                        error: observer.error.bind(observer),
+                                        complete: observer.complete.bind(observer),
+                                    };
+
+                                    // Retry last failed request
+                                    forward(operation).subscribe(subscriber);
+                                    return;
+                                } else {
+                                    return await removeBothTokens();
+                                }
+                            } catch (e) {
+                                return await removeBothTokens();
+                            }
+                        };
+
+                        refreshAccessToken();
                     });
                 }
                 // showMessage({
@@ -101,7 +120,7 @@ const createClient = (values: ClientValues): ApolloClient<any> => {
                 //     type: "danger",
                 //     duration: 10000,
                 // });
-            });
+            }
         }
 
         if (networkError) {
@@ -145,6 +164,7 @@ const createClient = (values: ClientValues): ApolloClient<any> => {
     const client = new ApolloClient<any>({
         link: from([authLink, errorLink, httpLink]),
         cache,
+        queryDeduplication: false,
     });
 
     async function clearClient(): Promise<any[]> {

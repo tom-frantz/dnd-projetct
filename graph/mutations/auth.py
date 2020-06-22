@@ -1,3 +1,5 @@
+import datetime
+
 from flask_jwt_extended import (
     create_refresh_token,
     create_access_token,
@@ -5,10 +7,11 @@ from flask_jwt_extended import (
     get_jwt_identity,
     decode_token,
 )
-from graphene import String, ObjectType
+from graphene import String, ObjectType, Field
 from passlib.handlers.pbkdf2 import pbkdf2_sha256
 
 from graph.mutations import BaseMutation
+from graph.types.user import User
 from graph.types.utils.error import Error
 from graph.types.models.user import UserModel
 from graph.auth import user_loader_callback
@@ -22,6 +25,7 @@ class Login(BaseMutation):
     class Login(ObjectType):
         refresh_token = String(required=True)
         access_token = String(required=True)
+        user = Field(User, required=True)
 
     @staticmethod
     def mutate(root, info, username, password):
@@ -35,7 +39,10 @@ class Login(BaseMutation):
 
         return Login.Success(
             refresh_token=create_refresh_token(user),
-            access_token=create_access_token(user),
+            access_token=create_access_token(
+                user, expires_delta=datetime.timedelta(seconds=1)
+            ),
+            user=user,
         )
 
 
@@ -52,7 +59,9 @@ class Refresh(BaseMutation):
             token = decode_token(refresh_token)
             current_user = user_loader_callback(token["identity"])
             return Refresh.Success(
-                access_token=create_access_token(identity=current_user)
+                access_token=create_access_token(
+                    identity=current_user, expires_delta=datetime.timedelta(seconds=1)
+                )
             )
         except Exception as e:
             return Refresh.Fail(errors=[])

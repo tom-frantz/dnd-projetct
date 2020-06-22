@@ -5,6 +5,7 @@ export interface Theme {
     defaultSpacing: number;
     primaryColour: string;
     secondaryColour: string;
+    dangerColour: string;
 
     defaultFont: TextStyle;
     titleFont: TextStyle;
@@ -20,6 +21,7 @@ export const defaultTheme: Theme = {
     defaultSpacing: 13,
     primaryColour: "#003362",
     secondaryColour: "#054177",
+    dangerColour: "#AF4F46",
     defaultFont: { fontFamily: "Quattrocento Sans Regular", fontSize: 14 },
     titleFont: {
         color: "#003362",

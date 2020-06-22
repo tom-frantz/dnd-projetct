@@ -16,10 +16,10 @@ from graph.types.models.value import RuleModel, ValueModel
 
 
 class DocumentSectionModel(EmbeddedDocument):
-    name = StringField(required=True)
+    name = StringField()
     description = StringField()
 
-    template = EmbeddedDocumentField(TemplateSectionModel, required=True)
+    template = EmbeddedDocumentField(TemplateSectionModel)
     values = EmbeddedDocumentListField(ValueModel)
     content = StringField()
 
@@ -30,12 +30,10 @@ class DocumentModel(Document):
     title = StringField(required=True)
     description = StringField()
 
-    author = ReferenceField("UserModel", required=True)
+    author = ReferenceField("UserModel", required=True, unique=False)
     created = DateTimeField(required=True, default=datetime.datetime.utcnow)
 
-    contents = EmbeddedDocumentListField(
-        DocumentSectionModel, default=list, required=True
-    )
+    contents = EmbeddedDocumentListField(DocumentSectionModel)
 
 
 if __name__ == '__main__':

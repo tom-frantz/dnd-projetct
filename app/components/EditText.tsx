@@ -11,7 +11,6 @@ import { EditingContext } from "../utils/EditingContext";
 
 interface EditTextProps {
     fieldName: string;
-    value?: string;
 
     style?: StyleProp<TextStyle>;
     editStyle?: StyleProp<TextStyle>;
@@ -19,14 +18,14 @@ interface EditTextProps {
 }
 
 const EditText: React.FC<EditTextProps> = (props: EditTextProps) => {
-    const { fieldName, value, style, editStyle, nonEditStyle } = props;
+    const { fieldName, style, editStyle, nonEditStyle } = props;
     const { editing } = useContext(EditingContext);
 
-    const [fieldValue, setFieldValue] = useState<string | undefined>(value);
     const [height, setHeight] = useState<number | undefined>(undefined);
     const textFieldRef = useRef<TextField>();
-
     const [input, meta, helper] = useField(fieldName);
+
+    const [fieldValue, setFieldValue] = useState<string | undefined>(input.value);
 
     const fieldNameElements = fieldName.split(".");
     const label = fieldNameElements[fieldNameElements.length - 1];
@@ -38,7 +37,7 @@ const EditText: React.FC<EditTextProps> = (props: EditTextProps) => {
                 //@ts-ignore
                 ref={textFieldRef}
                 value={fieldValue}
-                defaultValue={value}
+                defaultValue={fieldValue}
                 error={meta.touched ? meta.error : undefined}
                 onChangeText={(text) => {
                     setFieldValue(text);
@@ -65,7 +64,7 @@ const EditText: React.FC<EditTextProps> = (props: EditTextProps) => {
         );
     } else {
         if (textFieldRef.current) textFieldRef.current.blur();
-        return <Text style={[style, nonEditStyle]}>{value}</Text>;
+        return <Text style={[style, nonEditStyle]}>{input.value}</Text>;
     }
 };
 

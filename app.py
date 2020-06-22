@@ -18,12 +18,16 @@ from graph.schema import schema
 from graph.auth import init_auth
 from graph.types.document import document_middleware
 
-load_dotenv()
+from gevent import pywsgi
+from geventwebsocket.handler import WebSocketHandler
+
+
+load_dotenv(f".env.{os.environ.get('ENV', 'development')}")
 
 app = Flask(__name__)
 app.config["JWT_SECRET_KEY"] = os.environ["SECRET_KEY"]
 
-db = connect(db="dnd_test")
+db = connect(host=os.environ["CONNECTION_STRING"])
 jwt = JWTManager(app)
 cors = CORS(app, resources={r"/graphql": {"origins": "*"}})
 
@@ -50,10 +54,11 @@ def echo_socket(ws):
 
 init_auth(jwt)
 
-if __name__ == '__main__':
-    from gevent import pywsgi
-    from geventwebsocket.handler import WebSocketHandler
+server = pywsgi.WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler)
 
-    server = pywsgi.WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler)
+# For serverless deployment.
+application = server.application
+
+if __name__ == '__main__':
     print("Running on localhost (127.0.0.1:5000)")
     server.serve_forever()

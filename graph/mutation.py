@@ -3,7 +3,7 @@ from graphene import ObjectType
 from graph.mutations.auth import Login, Refresh
 from graph.mutations.user import UserCreate, UserUpdate, UserDelete
 
-from graph.mutations.documents import DocumentUpdate
+from graph.mutations.documents import DocumentUpdate, DocumentCreate
 
 
 class Mutation(ObjectType):
@@ -14,5 +14,5 @@ class Mutation(ObjectType):
     user_update = UserUpdate.Field()
     user_delete = UserDelete.Field()
 
-    # document_create = DocumentCreate.Field()
+    document_create = DocumentCreate.Field()
     document_update = DocumentUpdate.Field()

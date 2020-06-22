@@ -178,6 +178,7 @@ type Mutation {
   userCreate(input: UserInput, password: String!, username: String!): UserCreateResult
   userUpdate(input: UserInput): UserUpdateResult
   userDelete: UserDeleteResult
+  documentCreate(input: DocumentInput!): DocumentCreateResult
   documentUpdate(id: ID!, input: DocumentInput!): DocumentUpdateResult
 }
 
@@ -195,6 +196,7 @@ type Error {
 type Login {
   refreshToken: String!
   accessToken: String!
+  user: User!
 }
 
 union RefreshResult = MutationFail | Refresh
@@ -206,7 +208,9 @@ type Refresh {
 union UserCreateResult = MutationFail | UserCreate
 
 type UserCreate {
-  user: User
+  user: User!
+  refreshToken: String!
+  accessToken: String!
 }
 
 input UserInput {
@@ -225,10 +229,10 @@ type UserDelete {
   user: User
 }
 
-union DocumentUpdateResult = MutationFail | DocumentUpdate
+union DocumentCreateResult = MutationFail | DocumentCreate
 
-type DocumentUpdate {
-  document: Document
+type DocumentCreate {
+  document: Document!
 }
 
 input DocumentInput {
@@ -242,6 +246,12 @@ input DocumentSectionInput {
   name: String
   description: String
   content: String
+}
+
+union DocumentUpdateResult = MutationFail | DocumentUpdate
+
+type DocumentUpdate {
+  document: Document
 }
 
 type Subscription {

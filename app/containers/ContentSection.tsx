@@ -32,14 +32,12 @@ const ContentSection: React.FC<ContentSectionProps> = (props: ContentSectionProp
                         style={[headingFont]}
                         fieldName={`${fieldName}.name`}
                         nonEditStyle={{ marginRight: 13 }}
-                        value={name}
                     />
 
                     <EditText
                         style={{ fontWeight: "bold", alignSelf: "flex-end" }}
                         nonEditStyle={{ marginBottom: 6 }}
                         fieldName={`${fieldName}.description`}
-                        value={description}
                     />
                 </View>
                 {editing && (
@@ -54,7 +52,7 @@ const ContentSection: React.FC<ContentSectionProps> = (props: ContentSectionProp
                     </>
                 )}
             </View>
-            <EditText fieldName={`${fieldName}.content`} value={content} />
+            <EditText fieldName={`${fieldName}.content`} />
         </Section>
     );
 };

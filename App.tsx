@@ -22,9 +22,11 @@ import LoginScreen from "./app/screens/LoginScreen";
 import DocumentScreen from "./app/screens/DocumentScreen";
 import Text from "./app/components/Text";
 import Navbar from "./app/containers/Navbar";
+import RegisterScreen from "./app/screens/RegisterScreen";
 
 export type AppStackParamList = {
     Login: undefined;
+    Register: undefined;
     Landing: undefined;
     Document: { id: string };
 };
@@ -64,16 +66,16 @@ const App: React.FC = () => {
         >
             <ApolloProvider
                 client={getClient({
-                    getAccessToken: async () => accessToken || null,
+                    getAccessToken,
                     getRefreshToken,
                     setAccessToken: async (token: string) => {
                         await setAccessToken(token);
-                        await setReactToken(token);
+                        setReactToken(token);
                     },
                     setRefreshToken,
                     removeAccessToken: async () => {
-                        await setReactToken(undefined);
                         await removeAccessToken();
+                        setReactToken(undefined);
                     },
                     removeRefreshToken,
                 })}
@@ -95,7 +97,18 @@ const App: React.FC = () => {
                 >
                     <Stack.Navigator screenOptions={{ header: Navbar }}>
                         {accessToken === undefined && (
-                            <Stack.Screen name={"Login"} component={LoginScreen} />
+                            <>
+                                <Stack.Screen
+                                    name={"Login"}
+                                    component={LoginScreen}
+                                    options={{ header: () => null }}
+                                />
+                                <Stack.Screen
+                                    name={"Register"}
+                                    component={RegisterScreen}
+                                    options={{ header: () => null }}
+                                />
+                            </>
                         )}
                         {accessToken !== undefined && (
                             <>

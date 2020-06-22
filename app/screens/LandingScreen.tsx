@@ -1,26 +1,42 @@
 import React, { useContext, useEffect } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
-import { useQuery } from "@apollo/react-hooks";
+import { ActivityIndicator, StyleSheet, TouchableOpacity, View } from "react-native";
+import { useQuery, useMutation } from "@apollo/react-hooks";
 import Text from "../components/Text";
-import { MeDocument, MeQuery, MeQueryVariables } from "../graph/graphql";
+import {
+    CreateNewDocumentDocument,
+    CreateNewDocumentMutation,
+    CreateNewDocumentMutationVariables,
+    MeDocument,
+    MeQuery,
+    MeQueryVariables,
+} from "../graph/graphql";
 import { AuthContext } from "../app/auth";
 import { StackNavigationProp, StackScreenProps } from "@react-navigation/stack";
 import { AppStackParamList } from "../../App";
+import Button from "../components/Button";
+import Section from "../components/Section";
+import { Icon } from "react-native-elements";
+import { ThemeContext } from "../utils/ThemeContext";
 
 interface LandingScreenProps extends StackScreenProps<AppStackParamList, "Landing"> {}
 
 const LandingScreen: React.FC<LandingScreenProps> = (props: LandingScreenProps) => {
     const { navigation } = props;
-    const { token, setTokens } = useContext(AuthContext);
+    const { token, setTokens, clearTokens } = useContext(AuthContext);
+    const { primaryColour } = useContext(ThemeContext);
 
-    const { data, loading, error } = useQuery<MeQuery, MeQueryVariables>(MeDocument);
+    const { data, loading, error, refetch } = useQuery<MeQuery, MeQueryVariables>(MeDocument);
+
+    const [createNewDocument, {}] = useMutation<
+        CreateNewDocumentMutation,
+        CreateNewDocumentMutationVariables
+    >(CreateNewDocumentDocument);
 
     if (loading) {
         return <ActivityIndicator size={"large"} color={"#000"} />;
     }
 
     if (error) {
-        console.info(error);
         return <Text>There was an error</Text>;
     }
 
@@ -32,37 +48,68 @@ const LandingScreen: React.FC<LandingScreenProps> = (props: LandingScreenProps) 
 
     return (
         <View style={styles.container}>
-            <View style={[styles.sectionStyle, styles.firstSection]}>
+            <Section first>
                 <Text title>{username}</Text>
-            </View>
-
-            <View style={styles.sectionStyle}>
-                <Text heading>Articles</Text>
-                <View style={{ paddingLeft: 13 }}>
+            </Section>
+            <Section>
+                <View style={{ flexDirection: "row" }}>
+                    <Text style={{ marginRight: 13, flexGrow: 1 }} heading>
+                        Articles
+                    </Text>
+                    <Button
+                        onPress={() => {
+                            createNewDocument().then((res) => {
+                                if (res.data?.documentCreate?.__typename == "DocumentCreate") {
+                                    navigation.navigate("Document", {
+                                        id: res.data.documentCreate.document.id,
+                                    });
+                                }
+                            });
+                        }}
+                        style={{ alignSelf: "flex-start" }}
+                    >
+                        Create
+                    </Button>
+                </View>
+                <View>
                     {articles &&
                         articles.edges.map((edge) => {
                             if (edge == undefined || edge.node == undefined) {
                                 return null;
                             }
                             return (
-                                <View key={edge.node.id}>
-                                    <Text
-                                        subheading
-                                        onPress={() => {
-                                            navigation.navigate("Document", {
-                                                id: (edge.node as { id: string }).id,
-                                            });
-                                        }}
-                                        style={{ textDecorationLine: "underline" }}
-                                    >
-                                        {edge.node.title}
-                                    </Text>
-                                    <Text>{edge.node.description}</Text>
-                                </View>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        navigation.navigate("Document", {
+                                            id: (edge.node as { id: string }).id,
+                                        });
+                                    }}
+                                    key={edge.node.id}
+                                    style={{ borderTopWidth: 0.8, borderBottomWidth: 0.8 }}
+                                >
+                                    <View style={{ flexDirection: "row", alignItems: "center" }}>
+                                        <Icon
+                                            name={"subject"}
+                                            type={"material"}
+                                            color={primaryColour}
+                                            style={{ padding: 13 }}
+                                            onPress={() => {}}
+                                        />
+                                        <View>
+                                            <Text subheading>{edge.node.title}</Text>
+                                            <Text style={{ paddingLeft: 13 * 1.5 }}>
+                                                {edge.node.description}
+                                            </Text>
+                                        </View>
+                                    </View>
+                                </TouchableOpacity>
                             );
                         })}
                 </View>
-            </View>
+            </Section>
+            <Section last>
+                <Button onPress={clearTokens}>Logout</Button>
+            </Section>
         </View>
     );
 };

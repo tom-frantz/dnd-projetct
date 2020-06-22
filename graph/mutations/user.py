@@ -1,4 +1,10 @@
-from flask_jwt_extended import jwt_required, get_jwt_identity, get_current_user
+from flask_jwt_extended import (
+    jwt_required,
+    get_jwt_identity,
+    get_current_user,
+    create_refresh_token,
+    create_access_token,
+)
 from graphene import String, ObjectType, Field
 from graphql_relay import from_global_id
 from passlib.handlers.pbkdf2 import pbkdf2_sha256
@@ -17,7 +23,9 @@ class UserCreate(BaseMutation):
         input = UserInput()
 
     class UserCreate(ObjectType):
-        user = Field(User)
+        user = Field(User, required=True)
+        refresh_token = String(required=True)
+        access_token = String(required=True)
 
     @staticmethod
     def mutate(root, info, username, password):
@@ -26,7 +34,11 @@ class UserCreate(BaseMutation):
         )
         user.save()
 
-        return UserCreate.Success(user)
+        return UserCreate.Success(
+            user=user,
+            refresh_token=create_refresh_token(user),
+            access_token=create_access_token(user),
+        )
 
 
 class UserUpdate(BaseMutation):

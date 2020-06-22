@@ -1,16 +1,19 @@
 import React from "react";
-import { View } from "react-native";
+import { StyleProp, View, ViewStyle } from "react-native";
 
 interface SectionProps {
     children?: any;
     first?: boolean;
     last?: boolean;
+    style?: StyleProp<ViewStyle>;
 }
 
 const Section: React.FC<SectionProps> = (props: SectionProps) => {
-    const { children, first, last } = props;
+    const { children, first, last, style } = props;
     return (
-        <View style={[styles.section, first && styles.first, last && styles.last]}>{children}</View>
+        <View style={[styles.section, first && styles.first, last && styles.last, style]}>
+            {children}
+        </View>
     );
 };
 

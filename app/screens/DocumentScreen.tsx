@@ -22,6 +22,7 @@ import Button from "../components/Button";
 import Scrollbars from "react-custom-scrollbars";
 import { Icon } from "react-native-elements";
 import Section from "../components/Section";
+import EditText from "../components/EditText";
 
 interface DocumentScreenProps extends StackScreenProps<AppStackParamList, "Document"> {}
 
@@ -44,9 +45,8 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
         },
     } = props;
 
-    const {} = useContext(ThemeContext);
+    const { titleFont, subtitleFont, primaryColour, dangerColour } = useContext(ThemeContext);
 
-    const [lastSave, setLastSave] = useState<moment.Moment | undefined>(undefined);
     const [editing, setEditing] = useState<boolean>(false);
 
     const { data, error, loading } = useQuery<DocumentQuery, DocumentQueryVariables>(
@@ -105,8 +105,15 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
                                 <Section first>
                                     <View style={{ flexDirection: "row" }}>
                                         <View style={{ flexGrow: 1 }}>
-                                            <Text title>{title}</Text>
-                                            <Text subtitle>{description}</Text>
+                                            <EditText
+                                                fieldName={"title"}
+                                                style={titleFont}
+                                                editStyle={{ textTransform: "none" }}
+                                            />
+                                            <EditText
+                                                fieldName={"description"}
+                                                style={subtitleFont}
+                                            />
                                             <Text>
                                                 <Text bold>Created at:</Text>{" "}
                                                 {moment(created).format("MMMM Do, YYYY")}
@@ -116,6 +123,7 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
                                             <Icon
                                                 name={"settings"}
                                                 type={"material"}
+                                                color={primaryColour}
                                                 style={{ alignSelf: "flex-start" }}
                                                 onPress={() => setEditing(!editing)}
                                                 containerStyle={{
@@ -128,6 +136,7 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
                                             <Icon
                                                 name={"check"}
                                                 type={"material"}
+                                                color={primaryColour}
                                                 onPress={submitForm}
                                                 style={{ alignSelf: "flex-start" }}
                                                 containerStyle={{
@@ -140,9 +149,6 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
                                 </Section>
 
                                 {values.contents.map((content, index, array) => {
-                                    if (content == undefined) {
-                                        return null;
-                                    }
                                     return (
                                         <ContentSection
                                             last={index + 1 == array.length && !editing}
@@ -164,16 +170,25 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
                                 })}
 
                                 {editing && (
-                                    <Section last>
+                                    <Section last style={{ flexDirection: "row" }}>
+                                        <View style={{ flexGrow: 1 }}>
+                                            <Button
+                                                onPress={() => {
+                                                    setFieldValue("contents", [
+                                                        ...values.contents,
+                                                        { title },
+                                                    ]);
+                                                }}
+                                            >
+                                                Add Document Section
+                                            </Button>
+                                        </View>
                                         <Button
-                                            onPress={() => {
-                                                setFieldValue("contents", [
-                                                    ...values.contents,
-                                                    { title },
-                                                ]);
-                                            }}
+                                            danger
+                                            onPress={() => {}}
+                                            style={{ alignSelf: "flex-end" }}
                                         >
-                                            Add Document Section
+                                            Delete Document
                                         </Button>
                                     </Section>
                                 )}
