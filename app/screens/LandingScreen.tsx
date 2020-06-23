@@ -73,7 +73,7 @@ const LandingScreen: React.FC<LandingScreenProps> = (props: LandingScreenProps) 
                 </View>
                 <View>
                     {articles &&
-                        articles.edges.map((edge) => {
+                        articles.edges.map((edge, index) => {
                             if (edge == undefined || edge.node == undefined) {
                                 return null;
                             }
@@ -85,7 +85,10 @@ const LandingScreen: React.FC<LandingScreenProps> = (props: LandingScreenProps) 
                                         });
                                     }}
                                     key={edge.node.id}
-                                    style={{ borderTopWidth: 0.8, borderBottomWidth: 0.8 }}
+                                    style={{
+                                        borderTopWidth: index === 0 ? 0.8 : 0,
+                                        borderBottomWidth: 0.8,
+                                    }}
                                 >
                                     <View style={{ flexDirection: "row", alignItems: "center" }}>
                                         <Icon
@@ -97,9 +100,7 @@ const LandingScreen: React.FC<LandingScreenProps> = (props: LandingScreenProps) 
                                         />
                                         <View>
                                             <Text subheading>{edge.node.title}</Text>
-                                            <Text style={{ paddingLeft: 13 * 1.5 }}>
-                                                {edge.node.description}
-                                            </Text>
+                                            <Text>{edge.node.description}</Text>
                                         </View>
                                     </View>
                                 </TouchableOpacity>

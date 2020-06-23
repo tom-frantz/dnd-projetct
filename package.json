@@ -27,6 +27,7 @@
     "formik": "^2.1.4",
     "graphql": "^15.0.0",
     "graphql-tag": "^2.10.3",
+    "lodash": "^4.17.15",
     "moment": "^2.26.0",
     "react": "~16.9.0",
     "react-custom-scrollbars": "^4.2.1",
@@ -44,6 +45,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.8.6",
+    "@babel/plugin-proposal-optional-chaining": "^7.10.3",
+    "@expo/webpack-config": "^0.12.15",
     "@graphql-codegen/cli": "1.13.5",
     "@graphql-codegen/fragment-matcher": "1.13.5",
     "@graphql-codegen/introspection": "1.13.5",

@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Platform, StyleSheet, View } from "react-native";
 
 import { useMutation } from "@apollo/react-hooks";
 import Text from "../components/Text";
@@ -13,6 +13,7 @@ import { useNavigation } from "@react-navigation/native";
 import { RegisterDocument, RegisterMutation, RegisterMutationVariables } from "../graph/graphql";
 import { ThemeContext } from "../utils/ThemeContext";
 import { AuthContext } from "../app/auth";
+import FormikTextField from "../components/form/FormikTextField";
 
 interface RegisterScreenProps {}
 
@@ -69,77 +70,27 @@ const RegisterScreen: React.FC<RegisterScreenProps> = (props: RegisterScreenProp
                         });
                     }}
                 >
-                    {({
-                        status,
-                        handleSubmit,
-                        values,
-                        errors,
-                        touched,
-                        handleBlur,
-                        handleChange,
-                    }) => (
+                    {({ status, handleSubmit }) => (
                         <View>
                             <View style={{ marginVertical: 13, alignItems: "center" }}>
-                                <TextField
-                                    value={values.username}
-                                    error={(touched.username && errors.username) || undefined}
-                                    onChange={handleChange("username")}
-                                    onBlur={handleBlur("username")}
-                                    label={"username"}
-                                    containerStyle={styles.containerStyleOverride}
-                                    labelTextStyle={styles.labelTextOverride}
-                                    fontSize={14}
-                                />
-                                <TextField
-                                    value={values.password}
-                                    error={(touched.password && errors.password) || undefined}
-                                    onChange={handleChange("password")}
-                                    onBlur={handleBlur("password")}
-                                    label={"password"}
-                                    containerStyle={styles.containerStyleOverride}
-                                    labelTextStyle={styles.labelTextOverride}
-                                    fontSize={14}
-                                    secureTextEntry={!passwordVisible}
-                                    renderRightAccessory={() => (
-                                        <Icon
-                                            name={passwordVisible ? "visibility-off" : "visibility"}
-                                            onPress={() => {
-                                                setPasswordVisible(!passwordVisible);
-                                            }}
-                                        />
-                                    )}
-                                />
-                                <TextField
-                                    value={values.confirmPassword}
-                                    error={
-                                        (touched.confirmPassword && errors.confirmPassword) ||
-                                        undefined
-                                    }
-                                    onChange={handleChange("confirmPassword")}
-                                    onBlur={handleBlur("confirmPassword")}
-                                    label={"confirm password"}
-                                    containerStyle={styles.containerStyleOverride}
-                                    labelTextStyle={styles.labelTextOverride}
-                                    fontSize={14}
-                                    secureTextEntry={!passwordConfirmVisible}
-                                    renderRightAccessory={() => (
-                                        <Icon
-                                            name={
-                                                passwordConfirmVisible
-                                                    ? "visibility-off"
-                                                    : "visibility"
-                                            }
-                                            onPress={() => {
-                                                setPasswordConfirmVisible(!passwordConfirmVisible);
-                                            }}
-                                        />
-                                    )}
-                                />
+                                <FormikTextField fieldName={"username"} />
+                                <FormikTextField fieldName={"password"} passwordField />
+                                <FormikTextField fieldName={"confirmPassword"} passwordField />
                                 {status && <Text style={{ color: dangerColour }}>{status}</Text>}
                             </View>
-                            <Button onPress={handleSubmit} style={{ marginBottom: 13 }}>
-                                Submit
-                            </Button>
+                            <View
+                                style={{
+                                    flexDirection: "row",
+                                    justifyContent: "flex-start",
+                                    alignItems: "center",
+                                    marginBottom: 13,
+                                }}
+                            >
+                                <Button onPress={handleSubmit} style={{ marginRight: 13 }}>
+                                    Submit
+                                </Button>
+                                <ActivityIndicator animating={loading} size={"small"} />
+                            </View>
                             <Text>
                                 Already have an account?{" "}
                                 <Text

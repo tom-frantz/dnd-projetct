@@ -14,7 +14,7 @@ import {
 } from "../graph/graphql";
 import moment from "moment";
 import ContentSection from "../containers/ContentSection";
-import { Formik, useFormik } from "formik";
+import { Formik, FormikErrors, useFormik } from "formik";
 import * as Yup from "yup";
 import { EditingContext } from "../utils/EditingContext";
 import { ThemeContext } from "../utils/ThemeContext";
@@ -31,7 +31,7 @@ const validationSchema = Yup.object({
     description: Yup.string(),
     contents: Yup.array(
         Yup.object({
-            name: Yup.string().required(),
+            name: Yup.string().required("name is a required field."),
             description: Yup.string(),
             content: Yup.string(),
         }).required()
@@ -94,17 +94,29 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
                                     },
                                 },
                                 refetchQueries: [{ query: DocumentDocument, variables: { id } }],
-                            }).then(() => {
-                                setEditing(false);
-                            });
+                            })
+                                .then(() => {
+                                    setEditing(false);
+                                })
+                                .catch((e) => {
+                                    console.error(e);
+                                });
                         }}
                         validationSchema={validationSchema}
                     >
-                        {({ submitForm, setFieldValue, errors, values, isValid }) => (
+                        {({
+                            submitForm,
+                            setFieldValue,
+                            values,
+                            handleSubmit,
+                            validateForm,
+                            setErrors,
+                            setTouched,
+                        }) => (
                             <>
                                 <Section first>
-                                    <View style={{ flexDirection: "row" }}>
-                                        <View style={{ flexGrow: 1 }}>
+                                    <View style={{ flexDirection: "row", width: "100%" }}>
+                                        <View style={{ flex: 1 }}>
                                             <EditText
                                                 fieldName={"title"}
                                                 style={titleFont}
@@ -137,7 +149,7 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
                                                 name={"check"}
                                                 type={"material"}
                                                 color={primaryColour}
-                                                onPress={submitForm}
+                                                onPress={handleSubmit}
                                                 style={{ alignSelf: "flex-start" }}
                                                 containerStyle={{
                                                     alignSelf: "flex-start",
@@ -153,10 +165,6 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
                                         <ContentSection
                                             last={index + 1 == array.length && !editing}
                                             fieldName={`contents[${index}]`}
-                                            key={content.name}
-                                            name={content.name}
-                                            description={content.description || undefined}
-                                            content={content.content || undefined}
                                             removeSection={() => {
                                                 setFieldValue(
                                                     "contents",

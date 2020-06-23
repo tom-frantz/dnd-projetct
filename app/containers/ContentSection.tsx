@@ -7,12 +7,7 @@ import { ThemeContext } from "../utils/ThemeContext";
 import Section from "../components/Section";
 
 interface ContentSectionProps {
-    // Content sections
-    name: string;
-    description?: string;
-    content?: string;
-
-    fieldName: string; // Name for formik field props.
+    fieldName: string;
 
     last?: boolean;
     removeSection(): void;
@@ -20,7 +15,7 @@ interface ContentSectionProps {
 
 const ContentSection: React.FC<ContentSectionProps> = (props: ContentSectionProps) => {
     const { headingFont } = useContext(ThemeContext);
-    const { name, description, content, fieldName, last, removeSection } = props;
+    const { fieldName, last, removeSection } = props;
 
     const { editing } = useContext(EditingContext);
 
@@ -52,7 +47,7 @@ const ContentSection: React.FC<ContentSectionProps> = (props: ContentSectionProp
                     </>
                 )}
             </View>
-            <EditText fieldName={`${fieldName}.content`} />
+            <EditText fieldName={`${fieldName}.content`} multiline numberOfLines={5} />
         </Section>
     );
 };

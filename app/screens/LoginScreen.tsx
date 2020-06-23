@@ -1,5 +1,5 @@
-import React, { useContext, useState } from "react";
-import { Platform, StyleSheet, View } from "react-native";
+import React, { useContext } from "react";
+import { ActivityIndicator, View } from "react-native";
 import { useMutation } from "@apollo/react-hooks";
 import Text from "../components/Text";
 import { LoginDocument, LoginMutation, LoginMutationVariables } from "../graph/graphql";
@@ -9,12 +9,10 @@ import { AuthContext } from "../app/auth";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import Section from "../components/Section";
-import { string } from "yup";
 import { useNavigation } from "@react-navigation/native";
 import { ThemeContext } from "../utils/ThemeContext";
-import { TextField } from "react-native-material-textfield";
-import { Icon } from "react-native-elements";
 import Button from "../components/Button";
+import FormikTextField from "../components/form/FormikTextField";
 
 interface LoginScreenProps {}
 
@@ -27,11 +25,7 @@ const LoginScreen: React.FC<LoginScreenProps> = (props: LoginScreenProps) => {
     const { setTokens } = useContext(AuthContext);
     const { dangerColour } = useContext(ThemeContext);
 
-    const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
-
-    const [login, { data, loading }] = useMutation<LoginMutation, LoginMutationVariables>(
-        LoginDocument
-    );
+    const [login, { loading }] = useMutation<LoginMutation, LoginMutationVariables>(LoginDocument);
 
     const navigation = useNavigation();
 
@@ -49,67 +43,49 @@ const LoginScreen: React.FC<LoginScreenProps> = (props: LoginScreenProps) => {
                                 username,
                                 password,
                             },
-                        }).then((res) => {
-                            if (res.data?.login?.__typename === "Login") {
-                                const { accessToken, refreshToken } = res.data.login;
-                                setTokens(accessToken, refreshToken);
-                            } else if (res.data?.login?.__typename === "MutationFail") {
-                                res.data.login.errors?.map((error) => {
-                                    if (error.path[0]) {
-                                        setFieldError(error.path.join("."), error.message);
-                                    } else {
-                                        setStatus(error.message);
-                                    }
-                                });
-                            }
-                        });
+                        })
+                            .then((res) => {
+                                if (res.data?.login?.__typename === "Login") {
+                                    const { accessToken, refreshToken } = res.data.login;
+                                    setTokens(accessToken, refreshToken);
+                                } else if (res.data?.login?.__typename === "MutationFail") {
+                                    res.data.login.errors?.map((error) => {
+                                        if (error.path[0]) {
+                                            setFieldError(error.path.join("."), error.message);
+                                        } else {
+                                            setStatus(error.message);
+                                        }
+                                    });
+                                }
+                            })
+                            .catch((e) => {
+                                setStatus(e.message);
+                            });
                     }}
                 >
-                    {({
-                        status,
-                        handleSubmit,
-                        values,
-                        errors,
-                        touched,
-                        handleBlur,
-                        handleChange,
-                    }) => (
+                    {({ status, handleSubmit }) => (
                         <View>
                             <View style={{ marginVertical: 13, alignItems: "center" }}>
-                                <TextField
-                                    value={values.username}
-                                    error={(touched.username && errors.username) || undefined}
-                                    onChange={handleChange("username")}
-                                    onBlur={handleBlur("username")}
-                                    label={"username"}
-                                    containerStyle={styles.containerStyleOverride}
-                                    labelTextStyle={styles.labelTextOverride}
-                                    fontSize={14}
-                                />
-                                <TextField
-                                    value={values.password}
-                                    error={(touched.password && errors.password) || undefined}
-                                    onChange={handleChange("password")}
-                                    onBlur={handleBlur("password")}
-                                    label={"password"}
-                                    containerStyle={styles.containerStyleOverride}
-                                    labelTextStyle={styles.labelTextOverride}
-                                    fontSize={14}
-                                    secureTextEntry={!passwordVisible}
-                                    renderRightAccessory={() => (
-                                        <Icon
-                                            name={passwordVisible ? "visibility-off" : "visibility"}
-                                            onPress={() => {
-                                                setPasswordVisible(!passwordVisible);
-                                            }}
-                                        />
-                                    )}
+                                <FormikTextField fieldName={"username"} />
+                                <FormikTextField
+                                    fieldName={"password"}
+                                    passwordField
                                 />
                                 {status && <Text style={{ color: dangerColour }}>{status}</Text>}
                             </View>
-                            <Button onPress={handleSubmit} style={{ marginBottom: 13 }}>
-                                Submit
-                            </Button>
+                            <View
+                                style={{
+                                    flexDirection: "row",
+                                    justifyContent: "flex-start",
+                                    alignItems: "center",
+                                    marginBottom: 13,
+                                }}
+                            >
+                                <Button onPress={handleSubmit} style={{ marginRight: 13 }}>
+                                    Submit
+                                </Button>
+                                <ActivityIndicator animating={loading} size={"small"} />
+                            </View>
                             <Text>
                                 Don't have an account?{" "}
                                 <Text
@@ -128,21 +104,5 @@ const LoginScreen: React.FC<LoginScreenProps> = (props: LoginScreenProps) => {
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    containerStyleOverride: { marginTop: -16, width: "100%" },
-    labelTextOverride: {
-        fontFamily: "Quattrocento Sans Regular",
-        fontSize: 14,
-        paddingLeft: Platform.OS == "web" ? "33.3333333%" : undefined,
-    },
-    override: {
-        fontFamily: "Quattrocento Sans Regular",
-        fontSize: 14,
-        marginTop: 24,
-        flexGrow: 1,
-        transform: [{ translateY: 0 }],
-    },
-});
 
 export default LoginScreen;
