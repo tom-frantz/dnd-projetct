@@ -9,9 +9,11 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 web-build/
+dist
 web-report/
 .env*
-
+.serverless
+.serverless-wsgi
 # macOS
 .DS_Store
 
