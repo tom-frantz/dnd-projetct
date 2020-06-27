@@ -69,6 +69,7 @@ const LoginScreen: React.FC<LoginScreenProps> = (props: LoginScreenProps) => {
                                 <FormikTextField fieldName={"username"} />
                                 <FormikTextField
                                     fieldName={"password"}
+                                    label={"PW"}
                                     passwordField
                                 />
                                 {status && <Text style={{ color: dangerColour }}>{status}</Text>}

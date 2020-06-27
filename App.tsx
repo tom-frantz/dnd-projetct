@@ -13,7 +13,7 @@ import {
     removeRefreshToken,
 } from "./app/app/auth";
 import LandingScreen from "./app/screens/LandingScreen";
-import { ActivityIndicator, Platform, ScrollView, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Platform, View } from "react-native";
 import { loadFonts } from "./app/app/fonts";
 
 import { NavigationContainer } from "@react-navigation/native";
@@ -23,6 +23,7 @@ import DocumentScreen from "./app/screens/DocumentScreen";
 import Text from "./app/components/Text";
 import Navbar from "./app/containers/Navbar";
 import RegisterScreen from "./app/screens/RegisterScreen";
+import Version from "./app/utils/Version";
 
 export type AppStackParamList = {
     Login: undefined;
@@ -122,7 +123,7 @@ const App: React.FC = () => {
                         )}
                     </Stack.Navigator>
                     <View style={{ backgroundColor: "#F2F2F2", padding: 13 }}>
-                        <Text>DnD Tracker - Tom Frantz</Text>
+                        <Text>DnD Tracker - Tom Frantz - V{Version}</Text>
                     </View>
                 </NavigationContainer>
                 {/*</ScrollView>*/}

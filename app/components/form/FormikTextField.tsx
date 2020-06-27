@@ -23,6 +23,7 @@ const FormikTextField: React.FC<FormikTextFieldProps> = (props: FormikTextFieldP
         onContentSizeChange,
         ...textFieldProps
     } = props;
+
     const { defaultFont } = useContext(ThemeContext);
     const [input, meta, helpers] = useField(fieldName);
     const { submitCount } = useFormikContext();
@@ -34,7 +35,7 @@ const FormikTextField: React.FC<FormikTextFieldProps> = (props: FormikTextFieldP
     const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
 
     const toggleVisible = () => {
-        setPasswordVisible(!passwordField);
+        setPasswordVisible(!passwordVisible);
     };
 
     const fontSize = StyleSheet.flatten(style)?.fontSize || (defaultFont.fontSize as number);
@@ -53,7 +54,7 @@ const FormikTextField: React.FC<FormikTextFieldProps> = (props: FormikTextFieldP
             }}
             error={((meta.touched || submitCount > 0) && meta.error) || ""}
             label={label || _.lowerCase(fieldName)}
-            secureTextEntry={passwordField === true}
+            secureTextEntry={passwordField ? !passwordVisible : false}
             renderRightAccessory={
                 passwordField
                     ? () => (

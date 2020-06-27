@@ -22,11 +22,7 @@ interface ClientValues {
 
 // const { endpoint } = getEnvVars();
 // TODO CHANGE FOR IOS SUPPORT TOO.
-export const uri = __DEV__
-    ? Platform.OS === "web"
-        ? "http://localhost:5000/graphql"
-        : "http://192.168.20.20:5000/graphql"
-    : "https://c29rm8ehti.execute-api.us-east-1.amazonaws.com/prod/graphql";
+export const uri = "https://c29rm8ehti.execute-api.us-east-1.amazonaws.com/prod/graphql";
 
 console.log(uri);
 
