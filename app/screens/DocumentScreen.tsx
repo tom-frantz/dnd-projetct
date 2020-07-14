@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { StackNavigationProp, StackScreenProps } from "@react-navigation/stack";
 import { AppStackParamList } from "../../App";
@@ -23,6 +23,7 @@ import Scrollbars from "react-custom-scrollbars";
 import { Icon } from "react-native-elements";
 import Section from "../components/Section";
 import EditText from "../components/EditText";
+import { Layout } from "@ui-kitten/components";
 
 interface DocumentScreenProps extends StackScreenProps<AppStackParamList, "Document"> {}
 
@@ -54,6 +55,8 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
         { variables: { id }, skip: id === "" }
     );
 
+    console.log(data);
+
     const [documentUpdate, { loading: updateLoading }] = useMutation<
         DocumentUpdateMutation,
         DocumentUpdateMutationVariables
@@ -67,7 +70,7 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
 
     return (
         <Scrollbars>
-            <View style={styles.container}>
+            <Layout level="4" style={styles.container}>
                 <EditingContext.Provider value={{ editing }}>
                     <Formik
                         initialValues={{
@@ -75,6 +78,12 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
                             description,
                             contents,
                         }}
+                        // Needed as the contents are rendered from the current formik values
+                        // This is in place to display something even if it's not saved ...
+                        // Not sure why'd we do that but oh well.
+
+                        // TODO potentially shift from formik values to Apollo values.
+                        enableReinitialize
                         onSubmit={async (values) => {
                             console.log("Submitting");
                             return documentUpdate({
@@ -126,10 +135,12 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
                                                 fieldName={"description"}
                                                 style={subtitleFont}
                                             />
-                                            <Text>
-                                                <Text bold>Created at:</Text>{" "}
-                                                {moment(created).format("MMMM Do, YYYY")}
-                                            </Text>
+                                            {!editing && (
+                                                <Text>
+                                                    <Text bold>Created at:</Text>{" "}
+                                                    {moment(created).format("MMMM Do, YYYY")}
+                                                </Text>
+                                            )}
                                         </View>
                                         {!editing && (
                                             <Icon
@@ -204,7 +215,7 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
                         )}
                     </Formik>
                 </EditingContext.Provider>
-            </View>
+            </Layout>
         </Scrollbars>
     );
 };

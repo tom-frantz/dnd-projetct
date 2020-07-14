@@ -1,12 +1,13 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { TextField, TextFieldProps } from "react-native-material-textfield";
-import { Platform, StyleSheet } from "react-native";
-import { Icon } from "react-native-elements";
+import { Platform, StyleSheet, TouchableWithoutFeedback } from "react-native";
 import { ThemeContext } from "../../utils/ThemeContext";
 import { useField, useFormikContext } from "formik";
 import _ from "lodash";
+import { Icon, Input, InputProps } from "@ui-kitten/components";
+import { valueFromAST } from "graphql";
 
-interface FormikTextFieldProps extends Exclude<TextFieldProps, "ref" | "secureTextEntry"> {
+interface FormikTextFieldProps extends InputProps {
     fieldName: string;
 
     passwordField?: boolean;
@@ -16,19 +17,13 @@ const FormikTextField: React.FC<FormikTextFieldProps> = (props: FormikTextFieldP
     const {
         fieldName,
         passwordField,
-        style,
-        labelTextStyle,
         label,
-        containerStyle,
         onContentSizeChange,
+        textStyle,
         ...textFieldProps
     } = props;
 
-    const { defaultFont } = useContext(ThemeContext);
     const [input, meta, helpers] = useField(fieldName);
-    const { submitCount } = useFormikContext();
-
-    const textFieldRef = useRef<TextField | null>(null);
 
     const [height, setHeight] = useState<number | undefined>(undefined);
     const [localValue, setLocalValue] = useState<string>(input.value);
@@ -38,48 +33,73 @@ const FormikTextField: React.FC<FormikTextFieldProps> = (props: FormikTextFieldP
         setPasswordVisible(!passwordVisible);
     };
 
-    const fontSize = StyleSheet.flatten(style)?.fontSize || (defaultFont.fontSize as number);
-    if ((meta.touched || submitCount > 0) && meta.error) {
-        console.error(meta.error);
-    }
-
     return (
-        <TextField
-            ref={textFieldRef}
+        <Input
             value={localValue}
-            onChangeText={setLocalValue}
+            label={label}
+            onChangeText={(text) => {
+                setLocalValue(text);
+                console.log(text);
+            }}
             onBlur={(e) => {
                 input.onBlur(e);
                 helpers.setValue(localValue);
             }}
-            error={((meta.touched || submitCount > 0) && meta.error) || ""}
-            label={label || _.lowerCase(fieldName)}
+            onContentSizeChange={(e) => {
+                setHeight(e.nativeEvent.contentSize.height);
+            }}
             secureTextEntry={passwordField ? !passwordVisible : false}
-            renderRightAccessory={
+            accessoryRight={
                 passwordField
-                    ? () => (
-                          <Icon
-                              name={passwordVisible ? "visibility-off" : "visibility"}
-                              onPress={() => toggleVisible()}
-                          />
+                    ? (props) => (
+                          <TouchableWithoutFeedback onPress={toggleVisible}>
+                              <Icon {...props} name={passwordVisible ? "eye-off" : "eye"} />
+                          </TouchableWithoutFeedback>
                       )
                     : undefined
             }
-            fontSize={fontSize}
-            labelFontSize={14}
-            onContentSizeChange={(e) => {
-                console.log(e);
-                if (onContentSizeChange) {
-                    onContentSizeChange(e);
-                }
-                setHeight(e.nativeEvent.contentSize.height);
-            }}
+            textStyle={[{ minHeight: height, flexGrow: 1 }, textStyle]}
             {...textFieldProps}
-            style={[styles.override, defaultFont, { height }, style]}
-            labelTextStyle={[defaultFont, styles.labelTextOverride, labelTextStyle]}
-            containerStyle={[styles.containerStyleOverride, containerStyle]}
         />
     );
+
+    // return (
+    //     <TextField
+    //         ref={textFieldRef}
+    //         value={localValue}
+    //         onChangeText={setLocalValue}
+    //         onBlur={(e) => {
+    //             input.onBlur(e);
+    //             helpers.setValue(localValue);
+    //         }}
+    //         error={((meta.touched || submitCount > 0) && meta.error) || ""}
+    //         label={label || _.lowerCase(fieldName)}
+    //         secureTextEntry={passwordField ? !passwordVisible : false}
+    //         renderRightAccessory={
+    //             passwordField
+    //                 ? () => (
+    //                       <Icon
+    //                           name={passwordVisible ? "visibility-off" : "visibility"}
+    //                           onPress={() => toggleVisible()}
+    //                       />
+    //                   )
+    //                 : undefined
+    //         }
+    //         fontSize={fontSize}
+    //         labelFontSize={14}
+    //         onContentSizeChange={(e) => {
+    //             console.log(e);
+    //             if (onContentSizeChange) {
+    //                 onContentSizeChange(e);
+    //             }
+    //             setHeight(e.nativeEvent.contentSize.height);
+    //         }}
+    //         {...textFieldProps}
+    //         style={[styles.override, defaultFont, { height }, style]}
+    //         labelTextStyle={[defaultFont, styles.labelTextOverride, labelTextStyle]}
+    //         containerStyle={[styles.containerStyleOverride, containerStyle]}
+    //     />
+    // );
 };
 
 const styles = StyleSheet.create({

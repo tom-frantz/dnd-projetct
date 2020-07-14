@@ -22,8 +22,10 @@ interface ClientValues {
 
 // const { endpoint } = getEnvVars();
 // TODO CHANGE FOR IOS SUPPORT TOO.
-export const uri = "https://c29rm8ehti.execute-api.us-east-1.amazonaws.com/prod/graphql";
-
+export const uri = __DEV__
+    ? "http://127.0.0.1:5000/graphql"
+    : "https://c29rm8ehti.execute-api.us-east-1.amazonaws.com/prod/graphql";
+// export const uri = "http://127.0.0.1:5000/graphql"
 console.log(uri);
 
 let client: ApolloClient<any> | undefined = undefined;
@@ -49,7 +51,7 @@ const createClient = (values: ClientValues): ApolloClient<any> => {
     const errorLink = onError(({ graphQLErrors, networkError, forward, operation }) => {
         if (graphQLErrors) {
             for (const error of graphQLErrors) {
-                const { message, locations, path } = error;
+                const { message, locations, path, extensions } = error;
                 console.warn(
                     `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
                 );

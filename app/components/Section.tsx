@@ -1,5 +1,6 @@
 import React from "react";
 import { StyleProp, View, ViewStyle } from "react-native";
+import { Layout } from "@ui-kitten/components";
 
 interface SectionProps {
     children?: any;
@@ -11,9 +12,12 @@ interface SectionProps {
 const Section: React.FC<SectionProps> = (props: SectionProps) => {
     const { children, first, last, style } = props;
     return (
-        <View style={[styles.section, first && styles.first, last && styles.last, style]}>
+        <Layout
+            level={"1"}
+            style={[styles.section, first && styles.first, last && styles.last, style]}
+        >
             {children}
-        </View>
+        </Layout>
     );
 };
 

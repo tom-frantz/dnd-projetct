@@ -14,17 +14,6 @@ class DocumentConnectionField(CustomConnectionField):
         exclude_fields = ("contents", "template")
 
 
-class RuleEngine(object):
-    pass
-
-
-def document_middleware(next, root, info, **args):
-    # print(root, info)
-    # if isinstance(root, DocumentModel) and not getattr(root, "rule_engine", False):
-    #     setattr(root, "rule_engine", RuleEngine())
-    return next(root, info, **args)
-
-
 class DocumentSection(MongoengineObjectType):
     class Meta:
         model = DocumentSectionModel

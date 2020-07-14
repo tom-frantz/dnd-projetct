@@ -7,6 +7,7 @@ from graphql import GraphQLCoreBackend
 from graphql_server import HttpQueryError, run_http_query, FormattedResult
 from graphql_ws.gevent import GeventSubscriptionServer, SubscriptionObserver
 from rx import AnonymousObservable, Observable
+from graphql_server import default_format_error
 
 
 def format_execution_result(

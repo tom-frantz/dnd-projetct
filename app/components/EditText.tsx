@@ -1,4 +1,3 @@
-// TODO edit out some stuff here, tis hurting.
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { Platform, StyleProp, StyleSheet, TextStyle } from "react-native";
 
@@ -19,10 +18,19 @@ interface EditTextProps {
 
     multiline?: boolean;
     numberOfLines?: number;
+    renderContent?: (value: string) => React.ReactNode;
 }
 
 const EditText: React.FC<EditTextProps> = (props: EditTextProps) => {
-    const { fieldName, style, editStyle, nonEditStyle, multiline, numberOfLines } = props;
+    const {
+        fieldName,
+        style,
+        editStyle,
+        nonEditStyle,
+        multiline,
+        numberOfLines,
+        renderContent,
+    } = props;
     const { editing } = useContext(EditingContext);
 
     const textFieldRef = useRef<TextField>();
@@ -43,7 +51,11 @@ const EditText: React.FC<EditTextProps> = (props: EditTextProps) => {
         );
     } else {
         if (textFieldRef.current) textFieldRef.current.blur();
-        return <Text style={[style, nonEditStyle]}>{input.value}</Text>;
+        return renderContent != undefined ? (
+            (renderContent(input.value) as null)
+        ) : (
+            <Text style={[style, nonEditStyle]}>{input.value}</Text>
+        );
     }
 };
 

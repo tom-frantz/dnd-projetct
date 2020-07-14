@@ -38,6 +38,7 @@ const LoginScreen: React.FC<LoginScreenProps> = (props: LoginScreenProps) => {
                     initialValues={{ username: "", password: "" }}
                     validationSchema={validationSchema}
                     onSubmit={({ username, password }, { setFieldError, setErrors, setStatus }) => {
+                        console.log(username, password, "LOGIN");
                         login({
                             variables: {
                                 username,
@@ -66,10 +67,15 @@ const LoginScreen: React.FC<LoginScreenProps> = (props: LoginScreenProps) => {
                     {({ status, handleSubmit }) => (
                         <View>
                             <View style={{ marginVertical: 13, alignItems: "center" }}>
-                                <FormikTextField fieldName={"username"} />
+                                <FormikTextField
+                                    fieldName={"username"}
+                                    label={"Username"}
+                                    style={{ alignSelf: "stretch" }}
+                                />
                                 <FormikTextField
                                     fieldName={"password"}
-                                    label={"PW"}
+                                    label={"Password"}
+                                    style={{ alignSelf: "stretch" }}
                                     passwordField
                                 />
                                 {status && <Text style={{ color: dangerColour }}>{status}</Text>}

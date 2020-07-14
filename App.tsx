@@ -18,12 +18,17 @@ import { loadFonts } from "./app/app/fonts";
 
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
+
+import * as eva from "@eva-design/eva";
+import { ApplicationProvider, IconRegistry, Layout } from "@ui-kitten/components";
+
 import LoginScreen from "./app/screens/LoginScreen";
 import DocumentScreen from "./app/screens/DocumentScreen";
 import Text from "./app/components/Text";
 import Navbar from "./app/containers/Navbar";
 import RegisterScreen from "./app/screens/RegisterScreen";
 import Version from "./app/utils/Version";
+import { EvaIconsPack } from "@ui-kitten/eva-icons";
 
 export type AppStackParamList = {
     Login: undefined;
@@ -82,50 +87,53 @@ const App: React.FC = () => {
                 })}
             >
                 {/*<ScrollView contentContainerStyle={{flex: 1}} style={{flex: 1}}>*/}
-                <NavigationContainer
-                    linking={
-                        Platform.OS === "web"
-                            ? {
-                                  prefixes: [],
-                                  config: {
-                                      Login: "login",
-                                      Landing: "landing",
-                                      Document: "document/:id",
-                                  },
-                              }
-                            : undefined
-                    }
-                >
-                    <Stack.Navigator screenOptions={{ header: Navbar }}>
-                        {accessToken === undefined && (
-                            <>
-                                <Stack.Screen
-                                    name={"Login"}
-                                    component={LoginScreen}
-                                    options={{ header: () => null }}
-                                />
-                                <Stack.Screen
-                                    name={"Register"}
-                                    component={RegisterScreen}
-                                    options={{ header: () => null }}
-                                />
-                            </>
-                        )}
-                        {accessToken !== undefined && (
-                            <>
-                                <Stack.Screen name={"Landing"} component={LandingScreen} />
-                                <Stack.Screen
-                                    name={"Document"}
-                                    component={DocumentScreen}
-                                    initialParams={{ id: "" }}
-                                />
-                            </>
-                        )}
-                    </Stack.Navigator>
-                    <View style={{ backgroundColor: "#F2F2F2", padding: 13 }}>
-                        <Text>DnD Tracker - Tom Frantz - V{Version}</Text>
-                    </View>
-                </NavigationContainer>
+                <IconRegistry icons={EvaIconsPack} />
+                <ApplicationProvider {...eva} theme={eva.light}>
+                    <NavigationContainer
+                        linking={
+                            Platform.OS === "web"
+                                ? {
+                                      prefixes: [],
+                                      config: {
+                                          Login: "login",
+                                          Landing: "landing",
+                                          Document: "document/:id",
+                                      },
+                                  }
+                                : undefined
+                        }
+                    >
+                        <Stack.Navigator screenOptions={{ header: Navbar }}>
+                            {accessToken === undefined && (
+                                <>
+                                    <Stack.Screen
+                                        name={"Login"}
+                                        component={LoginScreen}
+                                        options={{ header: () => null }}
+                                    />
+                                    <Stack.Screen
+                                        name={"Register"}
+                                        component={RegisterScreen}
+                                        options={{ header: () => null }}
+                                    />
+                                </>
+                            )}
+                            {accessToken !== undefined && (
+                                <>
+                                    <Stack.Screen name={"Landing"} component={LandingScreen} />
+                                    <Stack.Screen
+                                        name={"Document"}
+                                        component={DocumentScreen}
+                                        initialParams={{ id: "" }}
+                                    />
+                                </>
+                            )}
+                        </Stack.Navigator>
+                        <View style={{ backgroundColor: "#F2F2F2", padding: 13 }}>
+                            <Text>DnD Tracker - Tom Frantz - V{Version}</Text>
+                        </View>
+                    </NavigationContainer>
+                </ApplicationProvider>
                 {/*</ScrollView>*/}
             </ApolloProvider>
         </AuthContext.Provider>

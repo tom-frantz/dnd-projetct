@@ -4,7 +4,9 @@ from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from flask_jwt_extended.exceptions import NoAuthorizationError
 from flask_sockets import Sockets
+from graphql import GraphQLError
 
 from mongoengine import connect
 
@@ -16,7 +18,6 @@ from graph.overrides import (
 
 from graph.schema import schema
 from graph.auth import init_auth
-from graph.types.document import document_middleware
 
 from gevent import pywsgi
 from geventwebsocket.handler import WebSocketHandler
@@ -34,10 +35,7 @@ cors = CORS(app, resources={r"/graphql": {"origins": "*"}})
 app.add_url_rule(
     "/graphql",
     view_func=OverriddenView.as_view(
-        "graphql",
-        schema=schema,
-        backend=CustomBackend(),
-        middleware=[document_middleware],
+        "graphql", schema=schema, backend=CustomBackend(),
     ),
 )
 
@@ -50,6 +48,11 @@ app.app_protocol = lambda environ_path_info: 'graphql-ws'
 def echo_socket(ws):
     subscription_server.handle(ws)
     return []
+
+
+@app.errorhandler(NoAuthorizationError)
+def handle_auth_error(e):
+    raise GraphQLError(str(e + "123"), extensions={"code": "CUSTOM"})
 
 
 init_auth(jwt)
