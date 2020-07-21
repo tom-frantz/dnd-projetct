@@ -71,9 +71,23 @@ const RegisterScreen: React.FC<RegisterScreenProps> = (props: RegisterScreenProp
                     {({ status, handleSubmit }) => (
                         <View>
                             <View style={{ marginVertical: 13, alignItems: "center" }}>
-                                <FormikTextField fieldName={"username"} />
-                                <FormikTextField fieldName={"password"} passwordField />
-                                <FormikTextField fieldName={"confirmPassword"} passwordField />
+                                <FormikTextField
+                                    fieldName={"username"}
+                                    label={"Username"}
+                                    style={{ alignSelf: "stretch" }}
+                                />
+                                <FormikTextField
+                                    fieldName={"password"}
+                                    passwordField
+                                    label={"Password"}
+                                    style={{ alignSelf: "stretch" }}
+                                />
+                                <FormikTextField
+                                    fieldName={"confirmPassword"}
+                                    passwordField
+                                    label={"Confirm Password"}
+                                    style={{ alignSelf: "stretch" }}
+                                />
                                 {status && <Text style={{ color: dangerColour }}>{status}</Text>}
                             </View>
                             <View

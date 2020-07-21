@@ -19,6 +19,7 @@ import { Icon } from "react-native-elements";
 import { ThemeContext } from "../utils/ThemeContext";
 import { getClient } from "../app/client";
 import ArticleListItem from "../components/ArticleListItem";
+import { Layout } from "@ui-kitten/components";
 
 interface LandingScreenProps extends StackScreenProps<AppStackParamList, "Landing"> {}
 
@@ -49,7 +50,7 @@ const LandingScreen: React.FC<LandingScreenProps> = (props: LandingScreenProps) 
     const { username, articles, sharedArticles } = data.me;
 
     return (
-        <View style={styles.container}>
+        <Layout level={"4"} style={styles.container}>
             <Section first>
                 <Text title>{username}</Text>
             </Section>
@@ -141,7 +142,7 @@ const LandingScreen: React.FC<LandingScreenProps> = (props: LandingScreenProps) 
                     Logout
                 </Button>
             </Section>
-        </View>
+        </Layout>
     );
 };
 

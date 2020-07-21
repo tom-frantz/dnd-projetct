@@ -8,6 +8,7 @@
     "eject": "expo eject",
     "codegen": "graphql-codegen --config codegen.yml",
     "deploy-web": "expo build:web --no-pwa && sls deploy -c serverless-website.yml",
+    "deploy-server": "sls deploy",
     "test-web-build": "expo build:web --no-pwa && npx serve web-build"
   },
   "dependencies": {
