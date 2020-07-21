@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { StackNavigationProp, StackScreenProps } from "@react-navigation/stack";
 import { AppStackParamList } from "../../App";
 import Text from "../components/Text";
@@ -20,16 +20,18 @@ import { EditingContext } from "../utils/EditingContext";
 import { ThemeContext } from "../utils/ThemeContext";
 import Button from "../components/Button";
 import Scrollbars from "react-custom-scrollbars";
-import { Icon } from "react-native-elements";
 import Section from "../components/Section";
 import EditText from "../components/EditText";
-import { Layout } from "@ui-kitten/components";
+import { Card, Icon, Layout, Modal, Select, SelectItem } from "@ui-kitten/components";
+import Toast from "react-native-root-toast";
+import ShareModal from "../containers/ShareModal";
+import _ from "lodash";
 
 interface DocumentScreenProps extends StackScreenProps<AppStackParamList, "Document"> {}
 
 const validationSchema = Yup.object({
     title: Yup.string().required(),
-    description: Yup.string(),
+    description: Yup.string().nullable(),
     contents: Yup.array(
         Yup.object({
             name: Yup.string().required("name is a required field."),
@@ -49,13 +51,12 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
     const { titleFont, subtitleFont, primaryColour, dangerColour } = useContext(ThemeContext);
 
     const [editing, setEditing] = useState<boolean>(false);
+    const [shareModalVisible, setShareModalVisible] = useState<boolean>(false);
 
     const { data, error, loading } = useQuery<DocumentQuery, DocumentQueryVariables>(
         DocumentDocument,
         { variables: { id }, skip: id === "" }
     );
-
-    console.log(data);
 
     const [documentUpdate, { loading: updateLoading }] = useMutation<
         DocumentUpdateMutation,
@@ -66,11 +67,50 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
         return <Text>This is quirky</Text>;
     }
 
-    const { title, description, contents, created } = data.document;
+    const {
+        title,
+        description,
+        contents,
+        created,
+        privacySettings,
+        isAuthor,
+        author,
+        accessPermission,
+    } = data.document;
 
     return (
-        <Scrollbars>
-            <Layout level="4" style={styles.container}>
+        <Layout level="4" style={styles.container}>
+            <ShareModal
+                visible={shareModalVisible}
+                setVisible={setShareModalVisible}
+                isAuthor={isAuthor}
+                privacySettings={{
+                    ...privacySettings,
+                    usersAccess: privacySettings.usersAccess,
+                }}
+                onSubmit={({ publicAccessType, visibility, usersAccess }) => {
+                    documentUpdate({
+                        variables: {
+                            id,
+                            input: {
+                                privacySettings: {
+                                    publicAccessType,
+                                    visibility,
+                                    usersAccess,
+                                },
+                            },
+                        },
+                    })
+                        .then((data) => {
+                            console.log(data);
+                            setShareModalVisible(false);
+                        })
+                        .catch((errors) => {
+                            console.log(errors);
+                        });
+                }}
+            />
+            <Scrollbars autoHide={true}>
                 <EditingContext.Provider value={{ editing }}>
                     <Formik
                         initialValues={{
@@ -85,7 +125,16 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
                         // TODO potentially shift from formik values to Apollo values.
                         enableReinitialize
                         onSubmit={async (values) => {
-                            console.log("Submitting");
+                            let toast = Toast.show("Submitting", {
+                                duration: -1,
+                                position: Toast.positions.BOTTOM,
+                                shadow: true,
+                                backgroundColor: primaryColour,
+                                animation: true,
+                                opacity: 1,
+                                hideOnPress: false,
+                            });
+
                             return documentUpdate({
                                 variables: {
                                     id,
@@ -104,24 +153,35 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
                                 },
                                 refetchQueries: [{ query: DocumentDocument, variables: { id } }],
                             })
-                                .then(() => {
+                                .then((data) => {
                                     setEditing(false);
+                                    Toast.hide(toast);
+                                    Toast.show("Submitted!", {
+                                        duration: Toast.durations.SHORT,
+                                        position: Toast.positions.BOTTOM,
+                                        shadow: true,
+                                        backgroundColor: primaryColour,
+                                        animation: true,
+                                        opacity: 1,
+                                    });
+                                    return data;
                                 })
                                 .catch((e) => {
+                                    Toast.hide(toast);
+                                    Toast.show(e.message, {
+                                        duration: Toast.durations.LONG,
+                                        position: Toast.positions.BOTTOM,
+                                        shadow: false,
+                                        backgroundColor: dangerColour,
+                                        animation: true,
+                                        opacity: 1,
+                                    });
                                     console.error(e);
                                 });
                         }}
                         validationSchema={validationSchema}
                     >
-                        {({
-                            submitForm,
-                            setFieldValue,
-                            values,
-                            handleSubmit,
-                            validateForm,
-                            setErrors,
-                            setTouched,
-                        }) => (
+                        {({ setFieldValue, values, handleSubmit }) => (
                             <>
                                 <Section first>
                                     <View style={{ flexDirection: "row", width: "100%" }}>
@@ -136,37 +196,70 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
                                                 style={subtitleFont}
                                             />
                                             {!editing && (
-                                                <Text>
-                                                    <Text bold>Created at:</Text>{" "}
-                                                    {moment(created).format("MMMM Do, YYYY")}
-                                                </Text>
+                                                <>
+                                                    <Text>
+                                                        <Text bold>Created at:</Text>{" "}
+                                                        {moment(created).format("MMMM Do, YYYY")}
+                                                    </Text>
+                                                    <Text>
+                                                        <Text bold>Created by:</Text>{" "}
+                                                        {isAuthor ? "You" : author.username}
+                                                    </Text>
+                                                    {!isAuthor && (
+                                                        <Text>
+                                                            You have{" "}
+                                                            <Text bold>
+                                                                {_.startCase(accessPermission)}
+                                                            </Text>{" "}
+                                                            access.
+                                                        </Text>
+                                                    )}
+                                                </>
                                             )}
                                         </View>
                                         {!editing && (
-                                            <Icon
-                                                name={"settings"}
-                                                type={"material"}
-                                                color={primaryColour}
-                                                style={{ alignSelf: "flex-start" }}
-                                                onPress={() => setEditing(!editing)}
-                                                containerStyle={{
-                                                    alignSelf: "flex-start",
-                                                    marginLeft: 13,
-                                                }}
-                                            />
+                                            <>
+                                                <Button
+                                                    style={{ alignSelf: "flex-start" }}
+                                                    onPress={() => {
+                                                        setShareModalVisible(true);
+                                                    }}
+                                                >
+                                                    Share
+                                                </Button>
+                                                <TouchableOpacity
+                                                    onPress={() => {
+                                                        setEditing(!editing);
+                                                    }}
+                                                >
+                                                    <Icon
+                                                        name={"settings-2-outline"}
+                                                        fill={primaryColour}
+                                                        style={{
+                                                            width: 24,
+                                                            height: 24,
+                                                            marginLeft: 13,
+                                                        }}
+                                                    />
+                                                </TouchableOpacity>
+                                            </>
                                         )}
                                         {editing && (
-                                            <Icon
-                                                name={"check"}
-                                                type={"material"}
-                                                color={primaryColour}
-                                                onPress={handleSubmit}
-                                                style={{ alignSelf: "flex-start" }}
-                                                containerStyle={{
-                                                    alignSelf: "flex-start",
-                                                    marginLeft: 13,
+                                            <TouchableOpacity
+                                                onPress={() => {
+                                                    handleSubmit();
                                                 }}
-                                            />
+                                            >
+                                                <Icon
+                                                    name={"checkmark-outline"}
+                                                    fill={primaryColour}
+                                                    style={{
+                                                        width: 24,
+                                                        height: 24,
+                                                        marginLeft: 13,
+                                                    }}
+                                                />
+                                            </TouchableOpacity>
                                         )}
                                     </View>
                                 </Section>
@@ -215,8 +308,8 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
                         )}
                     </Formik>
                 </EditingContext.Provider>
-            </Layout>
-        </Scrollbars>
+            </Scrollbars>
+        </Layout>
     );
 };
 
@@ -224,7 +317,6 @@ const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
         display: "flex",
-        padding: 13,
     },
     lastSection: {
         borderBottomLeftRadius: 13,

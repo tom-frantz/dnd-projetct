@@ -3,7 +3,7 @@ from graphene import ObjectType
 from graph.mutations.auth import Login, Refresh
 from graph.mutations.user import UserCreate, UserUpdate, UserDelete
 
-from graph.mutations.documents import DocumentUpdate, DocumentCreate
+from graph.mutations.document import DocumentUpdate, DocumentCreate
 
 
 class Mutation(ObjectType):

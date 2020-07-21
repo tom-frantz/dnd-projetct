@@ -17,6 +17,8 @@ import Button from "../components/Button";
 import Section from "../components/Section";
 import { Icon } from "react-native-elements";
 import { ThemeContext } from "../utils/ThemeContext";
+import { getClient } from "../app/client";
+import ArticleListItem from "../components/ArticleListItem";
 
 interface LandingScreenProps extends StackScreenProps<AppStackParamList, "Landing"> {}
 
@@ -44,7 +46,7 @@ const LandingScreen: React.FC<LandingScreenProps> = (props: LandingScreenProps) 
         return <Text>There was an interesting error here?</Text>;
     }
 
-    const { username, articles } = data.me;
+    const { username, articles, sharedArticles } = data.me;
 
     return (
         <View style={styles.container}>
@@ -77,39 +79,67 @@ const LandingScreen: React.FC<LandingScreenProps> = (props: LandingScreenProps) 
                             if (edge == undefined || edge.node == undefined) {
                                 return null;
                             }
+
+                            const { title, description, id } = edge.node;
                             return (
-                                <TouchableOpacity
-                                    onPress={() => {
+                                <ArticleListItem
+                                    first={index === 0}
+                                    title={title}
+                                    description={description}
+                                    navigateToDocument={() =>
                                         navigation.navigate("Document", {
                                             id: (edge.node as { id: string }).id,
-                                        });
-                                    }}
-                                    key={edge.node.id}
-                                    style={{
-                                        borderTopWidth: index === 0 ? 0.8 : 0,
-                                        borderBottomWidth: 0.8,
-                                    }}
-                                >
-                                    <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                        <Icon
-                                            name={"subject"}
-                                            type={"material"}
-                                            color={primaryColour}
-                                            style={{ padding: 13 }}
-                                            onPress={() => {}}
-                                        />
-                                        <View>
-                                            <Text subheading>{edge.node.title}</Text>
-                                            <Text>{edge.node.description}</Text>
-                                        </View>
-                                    </View>
-                                </TouchableOpacity>
+                                        })
+                                    }
+                                    id={id}
+                                />
+                            );
+                        })}
+                </View>
+            </Section>
+            <Section>
+                <Text style={{ marginRight: 13, flexGrow: 1 }} heading>
+                    Shared with you
+                </Text>
+                <View>
+                    {sharedArticles &&
+                        sharedArticles.edges.map((edge, index) => {
+                            if (edge == undefined || edge.node == undefined) {
+                                return null;
+                            }
+
+                            const {
+                                title,
+                                description,
+                                id,
+                                author: { username },
+                            } = edge.node;
+                            return (
+                                <ArticleListItem
+                                    first={index === 0}
+                                    title={title}
+                                    description={description}
+                                    navigateToDocument={() =>
+                                        navigation.navigate("Document", {
+                                            id: (edge.node as { id: string }).id,
+                                        })
+                                    }
+                                    authorUsername={username}
+                                    id={id}
+                                />
                             );
                         })}
                 </View>
             </Section>
             <Section last>
-                <Button onPress={clearTokens}>Logout</Button>
+                <Button
+                    onPress={() => {
+                        getClient().clearStore();
+                        clearTokens();
+                    }}
+                >
+                    Logout
+                </Button>
             </Section>
         </View>
     );

@@ -1,6 +1,5 @@
 import React, { useContext } from "react";
-import { View } from "react-native";
-import { Icon } from "react-native-elements";
+import { TouchableOpacity, View } from "react-native";
 import { EditingContext } from "../utils/EditingContext";
 import EditText from "../components/EditText";
 import { ThemeContext } from "../utils/ThemeContext";
@@ -10,6 +9,7 @@ import { useNavigation } from "@react-navigation/native";
 
 // @ts-ignore
 import Parser from "simple-text-parser";
+import { Icon } from "@ui-kitten/components";
 
 interface ContentSectionProps {
     fieldName: string;
@@ -125,13 +125,21 @@ const ContentSection: React.FC<ContentSectionProps> = (props: ContentSectionProp
                 </View>
                 {editing && (
                     <>
-                        <Icon
-                            name={"delete"}
-                            type={"material"}
-                            style={{ alignSelf: "flex-start" }}
-                            onPress={removeSection}
-                            containerStyle={{ alignSelf: "flex-start", marginLeft: 13 }}
-                        />
+                        <TouchableOpacity
+                            onPress={() => {
+                                removeSection();
+                            }}
+                        >
+                            <Icon
+                                name={"trash-outline"}
+                                fill={primaryColour}
+                                style={{
+                                    width: 24,
+                                    height: 24,
+                                    marginLeft: 13,
+                                }}
+                            />
+                        </TouchableOpacity>
                     </>
                 )}
             </View>

@@ -1,14 +1,14 @@
 type Query {
   me: User
   user(id: ID!): User
-  users(before: String, after: String, first: Int, last: Int, id: ID, roles: String, username: String): UserConnection
+  users(before: String, after: String, first: Int, last: Int, id: ID, roles: String, username: String, username_Icontains: String, username_Not_Exact: String, id_Ne: ID): UserConnection
   templates(before: String, after: String, first: Int, last: Int, created: DateTime, description: String, id: ID, title: String): TemplateConnection
-  documents(before: String, after: String, first: Int, last: Int, created: DateTime, description: String, id: ID, title: String, author: ID): DocumentConnection
+  documents(before: String, after: String, first: Int, last: Int, created: DateTime, description: String, id: ID, title: String, author: ID, title_Icontains: String): DocumentConnection
   document(id: ID!): Document
 }
 
 type User implements Node {
-  articles(before: String, after: String, first: Int, last: Int, created: DateTime, description: String, id: ID, title: String, author: ID): DocumentConnection
+  articles(before: String, after: String, first: Int, last: Int, created: DateTime, description: String, id: ID, title: String, author: ID, title_Icontains: String): DocumentConnection
 
   # The ID of the object.
   id: ID!
@@ -18,6 +18,7 @@ type User implements Node {
 
   #
   username: String!
+  sharedArticles(before: String, after: String, first: Int, last: Int, created: DateTime, description: String, id: ID, title: String, author: ID, title_Icontains: String): DocumentConnection
 }
 
 # An object with an ID
@@ -59,8 +60,7 @@ type DocumentEdge {
 }
 
 type Document implements Node {
-  #
-  author: User
+  author: User!
   contents: [DocumentSection!]!
 
   #
@@ -71,9 +71,12 @@ type Document implements Node {
 
   # The ID of the object.
   id: ID!
+  privacySettings: PrivacySettings!
 
   #
   title: String!
+  isAuthor: Boolean!
+  accessPermission: AccessEnum!
 }
 
 type DocumentSection {
@@ -84,7 +87,7 @@ type DocumentSection {
   description: String
 
   #
-  name: String!
+  name: String
 
   #
   template: TemplateSection
@@ -120,6 +123,29 @@ interface Value {
 # value as specified by
 # [iso8601](https://en.wikipedia.org/wiki/ISO_8601).
 scalar DateTime
+
+type PrivacySettings {
+  publicAccessType: AccessEnum!
+  usersAccess: [UserPrivacySettings!]!
+  visibility: VisibilityEnum!
+}
+
+enum AccessEnum {
+  READ
+  EDIT
+  NONE
+}
+
+type UserPrivacySettings {
+  accessType: AccessEnum!
+  user: User!
+}
+
+enum VisibilityEnum {
+  PRIVATE
+  USERS
+  PUBLIC
+}
 
 type UserConnection {
   # Pagination data for this connection.
@@ -240,12 +266,24 @@ input DocumentInput {
   description: String
   author: ID
   contents: [DocumentSectionInput!]
+  privacySettings: PrivacySettingsInput
 }
 
 input DocumentSectionInput {
   name: String
   description: String
   content: String
+}
+
+input PrivacySettingsInput {
+  visibility: VisibilityEnum
+  publicAccessType: AccessEnum
+  usersAccess: [UserPrivacySettingsInput!]
+}
+
+input UserPrivacySettingsInput {
+  accessType: AccessEnum
+  id: ID!
 }
 
 union DocumentUpdateResult = MutationFail | DocumentUpdate

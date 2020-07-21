@@ -30,11 +30,15 @@ console.log(uri);
 
 let client: ApolloClient<any> | undefined = undefined;
 
-export const getClient = (values: ClientValues) => {
+export const getClient = (values?: ClientValues) => {
     if (client != undefined) {
         return client;
     } else {
-        client = createClient(values);
+        if (values === undefined) {
+            throw Error("There was no client at this point.");
+        } else {
+            client = createClient(values);
+        }
         return client;
     }
 };

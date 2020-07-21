@@ -9,10 +9,24 @@ from mongoengine import (
     EmbeddedDocumentField,
     EmbeddedDocumentListField,
     connect,
+    BooleanField,
+    ListField,
 )
 
 from graph.types.models.template import TemplateSectionModel
 from graph.types.models.value import RuleModel, ValueModel
+
+# Document Privacy settings
+PUBLIC = "PUBLIC"
+USERS = "USERS"
+PRIVATE = "PRIVATE"
+VISIBILITY_TYPES = [PUBLIC, USERS, PRIVATE]
+
+# Non-author user perms
+EDIT = "EDIT"
+READ = "READ"
+NONE = "NONE"
+ACCESS_TYPES = [EDIT, READ]
 
 
 class DocumentSectionModel(EmbeddedDocument):
@@ -24,6 +38,19 @@ class DocumentSectionModel(EmbeddedDocument):
     content = StringField()
 
 
+class UserPrivacySettingsModel(EmbeddedDocument):
+    user = ReferenceField("UserModel", required=True)
+    access_type = StringField(choices=ACCESS_TYPES, default=READ, required=True)
+
+
+class PrivacySettingsModel(EmbeddedDocument):
+    # Link = Graph document ID
+    visibility = StringField(choices=VISIBILITY_TYPES, default=PRIVATE, required=True)
+    public_access_type = StringField(choices=ACCESS_TYPES, default=READ, required=True)
+    # TODO: Make this so it can fine grain access per user.
+    users_access = EmbeddedDocumentListField(UserPrivacySettingsModel)
+
+
 class DocumentModel(Document):
     meta = {}
 
@@ -32,6 +59,13 @@ class DocumentModel(Document):
 
     author = ReferenceField("UserModel", required=True, unique=False)
     created = DateTimeField(required=True, default=datetime.datetime.utcnow)
+
+    privacy_settings = EmbeddedDocumentField(
+        PrivacySettingsModel,
+        default=lambda: PrivacySettingsModel(
+            public_access_type=READ, visibility=PRIVATE, users_access=[]
+        ),
+    )
 
     contents = EmbeddedDocumentListField(DocumentSectionModel)
 

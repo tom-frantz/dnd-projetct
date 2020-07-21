@@ -1088,6 +1088,11 @@
   resolved "https://registry.yarnpkg.com/@eva-design/eva/-/eva-2.0.0.tgz#6a6265322f66441a8765307f5197fd8117506d1e"
   integrity sha512-6cf3PPAZOHGl59Wx8QmPW/BZgGxOSjiLZctErBlFezsAdMNtoduUfoAE/SRaPFt25bTTpbPFL8o2FrxrQvvFeA==
 
+"@eva-design/material@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@eva-design/material/-/material-2.0.0.tgz#b24402ad140fa5b0d707811875b66542bf5ef1a1"
+  integrity sha512-Pm/FQ6qiJlbP6a7e1vc0wt9FA2VIA87uzWNyJQTeGhagd3rsvNuh4sCn0dl3aupeZ278cQ7nbh14KNjQoaZ2Gw==
+
 "@eva-design/processor@^2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@eva-design/processor/-/processor-2.0.0.tgz#b291fd94e11fd342fb06af6c333b2be99f4696a9"
@@ -9784,6 +9789,21 @@ react-native-reanimated@~1.7.0:
   dependencies:
     fbjs "^1.0.0"
 
+react-native-root-siblings@^4.0.0:
+  version "4.0.6"
+  resolved "https://registry.yarnpkg.com/react-native-root-siblings/-/react-native-root-siblings-4.0.6.tgz#6dd7eedb725faacd7ba19c159dd279cf2e6d8476"
+  integrity sha512-u/MaJLdD3bnshDFg8HWB0Xys1xlkQy6++3QthQlYw4kOFElobb6V1IIn5r46JvBTr9cf6dXsrFC4zPVXuwW1ww==
+  dependencies:
+    static-container "^1.5.1"
+
+react-native-root-toast@^3.2.1:
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/react-native-root-toast/-/react-native-root-toast-3.2.1.tgz#f456d029f5c5b76e4b686334f25371465478a3be"
+  integrity sha512-BNf6LKMqcIAonKgqCGQWk+1lduFqSjPYbEF0FygMZbXhODRTvrGUAvAgV6kfamVPOkKHUkPU7dnnvmgEQ8ZDzQ==
+  dependencies:
+    prop-types "^15.5.10"
+    react-native-root-siblings "^4.0.0"
+
 react-native-safe-area-context@0.7.3:
   version "0.7.3"
   resolved "https://registry.yarnpkg.com/react-native-safe-area-context/-/react-native-safe-area-context-0.7.3.tgz#ad6bd4abbabe195332c53810e4ce5851eb21aa2a"
@@ -10849,6 +10869,11 @@ stacktrace-parser@^0.1.3:
   integrity sha512-KJP1OCML99+8fhOHxwwzyWrlUuVX5GQ0ZpJTd1DFXhdkrvg1szxfHhawXUZ3g9TkXORQd4/WG68jMlQZ2p8wlg==
   dependencies:
     type-fest "^0.7.1"
+
+static-container@^1.5.1:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/static-container/-/static-container-1.5.1.tgz#9d7a94e04dea864539a7b6a1304843ada740dc19"
+  integrity sha512-OFChfLKIvSzaMA3otS5CEabJTIzHFPhMxogIT+io4F207PXTvS6woFyjXIyXyqMIYAhryePGeFZYC6uLcG1lpA==
 
 static-extend@^0.1.1:
   version "0.1.2"

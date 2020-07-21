@@ -19,7 +19,7 @@ import { loadFonts } from "./app/app/fonts";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 
-import * as eva from "@eva-design/eva";
+import * as eva from "@eva-design/material";
 import { ApplicationProvider, IconRegistry, Layout } from "@ui-kitten/components";
 
 import LoginScreen from "./app/screens/LoginScreen";
@@ -129,9 +129,9 @@ const App: React.FC = () => {
                                 </>
                             )}
                         </Stack.Navigator>
-                        <View style={{ backgroundColor: "#F2F2F2", padding: 13 }}>
-                            <Text>DnD Tracker - Tom Frantz - V{Version}</Text>
-                        </View>
+                        <Layout style={{ padding: 13 }} level={"4"}>
+                            <Text>Pocket Dimension - Tom Frantz - V{Version}</Text>
+                        </Layout>
                     </NavigationContainer>
                 </ApplicationProvider>
                 {/*</ScrollView>*/}

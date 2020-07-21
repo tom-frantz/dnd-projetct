@@ -37,6 +37,8 @@ const FormikTextField: React.FC<FormikTextFieldProps> = (props: FormikTextFieldP
         <Input
             value={localValue}
             label={label}
+            caption={meta.touched ? meta.error : undefined}
+            status={meta.touched && meta.error ? "danger" : undefined}
             onChangeText={(text) => {
                 setLocalValue(text);
                 console.log(text);

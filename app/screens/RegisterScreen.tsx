@@ -38,9 +38,6 @@ const RegisterScreen: React.FC<RegisterScreenProps> = (props: RegisterScreenProp
 
     const { setTokens } = useContext(AuthContext);
 
-    const [passwordVisible, setPasswordVisible] = useState<boolean>(false);
-    const [passwordConfirmVisible, setPasswordConfirmVisible] = useState<boolean>(false);
-
     return (
         <View style={{ alignItems: "center", margin: 13 * 4 }}>
             <Section style={{ width: 400, alignSelf: "center", margin: 13 * 4 }} first last>
@@ -49,6 +46,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = (props: RegisterScreenProp
                     initialValues={{ username: "", password: "", confirmPassword: "" }}
                     validationSchema={validationSchema}
                     onSubmit={({ username, password }, { setFieldError, setErrors, setStatus }) => {
+                        console.log("setting");
                         register({
                             variables: {
                                 username,

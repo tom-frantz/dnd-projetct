@@ -49,6 +49,9 @@ export type QueryUsersArgs = {
     id?: Maybe<Scalars["ID"]>;
     roles?: Maybe<Scalars["String"]>;
     username?: Maybe<Scalars["String"]>;
+    username_Icontains?: Maybe<Scalars["String"]>;
+    username_Not_Exact?: Maybe<Scalars["String"]>;
+    id_Ne?: Maybe<Scalars["ID"]>;
 };
 
 export type QueryTemplatesArgs = {
@@ -72,6 +75,7 @@ export type QueryDocumentsArgs = {
     id?: Maybe<Scalars["ID"]>;
     title?: Maybe<Scalars["String"]>;
     author?: Maybe<Scalars["ID"]>;
+    title_Icontains?: Maybe<Scalars["String"]>;
 };
 
 export type QueryDocumentArgs = {
@@ -85,6 +89,7 @@ export type User = Node & {
     id: Scalars["ID"];
     roles?: Maybe<Array<Maybe<Scalars["String"]>>>;
     username: Scalars["String"];
+    sharedArticles?: Maybe<DocumentConnection>;
 };
 
 export type UserArticlesArgs = {
@@ -97,6 +102,20 @@ export type UserArticlesArgs = {
     id?: Maybe<Scalars["ID"]>;
     title?: Maybe<Scalars["String"]>;
     author?: Maybe<Scalars["ID"]>;
+    title_Icontains?: Maybe<Scalars["String"]>;
+};
+
+export type UserSharedArticlesArgs = {
+    before?: Maybe<Scalars["String"]>;
+    after?: Maybe<Scalars["String"]>;
+    first?: Maybe<Scalars["Int"]>;
+    last?: Maybe<Scalars["Int"]>;
+    created?: Maybe<Scalars["DateTime"]>;
+    description?: Maybe<Scalars["String"]>;
+    id?: Maybe<Scalars["ID"]>;
+    title?: Maybe<Scalars["String"]>;
+    author?: Maybe<Scalars["ID"]>;
+    title_Icontains?: Maybe<Scalars["String"]>;
 };
 
 /** An object with an ID */
@@ -137,20 +156,23 @@ export type DocumentEdge = {
 
 export type Document = Node & {
     __typename?: "Document";
-    author?: Maybe<User>;
+    author: User;
     contents: Array<DocumentSection>;
     created: Scalars["DateTime"];
     description?: Maybe<Scalars["String"]>;
     /** The ID of the object. */
     id: Scalars["ID"];
+    privacySettings: PrivacySettings;
     title: Scalars["String"];
+    isAuthor: Scalars["Boolean"];
+    accessPermission: AccessEnum;
 };
 
 export type DocumentSection = {
     __typename?: "DocumentSection";
     content?: Maybe<Scalars["String"]>;
     description?: Maybe<Scalars["String"]>;
-    name: Scalars["String"];
+    name?: Maybe<Scalars["String"]>;
     template?: Maybe<TemplateSection>;
     values?: Maybe<Array<Maybe<Value>>>;
 };
@@ -167,6 +189,31 @@ export type Value = {
     name: Scalars["String"];
     description?: Maybe<Scalars["String"]>;
 };
+
+export type PrivacySettings = {
+    __typename?: "PrivacySettings";
+    publicAccessType: AccessEnum;
+    usersAccess: Array<UserPrivacySettings>;
+    visibility: VisibilityEnum;
+};
+
+export enum AccessEnum {
+    Read = "READ",
+    Edit = "EDIT",
+    None = "NONE",
+}
+
+export type UserPrivacySettings = {
+    __typename?: "UserPrivacySettings";
+    accessType: AccessEnum;
+    user: User;
+};
+
+export enum VisibilityEnum {
+    Private = "PRIVATE",
+    Users = "USERS",
+    Public = "PUBLIC",
+}
 
 export type UserConnection = {
     __typename?: "UserConnection";
@@ -317,12 +364,24 @@ export type DocumentInput = {
     description?: Maybe<Scalars["String"]>;
     author?: Maybe<Scalars["ID"]>;
     contents?: Maybe<Array<DocumentSectionInput>>;
+    privacySettings?: Maybe<PrivacySettingsInput>;
 };
 
 export type DocumentSectionInput = {
     name?: Maybe<Scalars["String"]>;
     description?: Maybe<Scalars["String"]>;
     content?: Maybe<Scalars["String"]>;
+};
+
+export type PrivacySettingsInput = {
+    visibility?: Maybe<VisibilityEnum>;
+    publicAccessType?: Maybe<AccessEnum>;
+    usersAccess?: Maybe<Array<UserPrivacySettingsInput>>;
+};
+
+export type UserPrivacySettingsInput = {
+    accessType?: Maybe<AccessEnum>;
+    id: Scalars["ID"];
 };
 
 export type DocumentUpdateResult = MutationFail | DocumentUpdate;
@@ -413,7 +472,7 @@ export type DocumentUpdateMutation = { __typename?: "Mutation" } & {
                       Document,
                       "id" | "title" | "description" | "created"
                   > & {
-                          author?: Maybe<{ __typename?: "User" } & Pick<User, "id">>;
+                          author: { __typename?: "User" } & Pick<User, "id">;
                           contents: Array<
                               { __typename?: "DocumentSection" } & Pick<
                                   DocumentSection,
@@ -455,17 +514,53 @@ export type MeQueryVariables = {};
 
 export type MeQuery = { __typename?: "Query" } & {
     me?: Maybe<
-        { __typename?: "User" } & Pick<User, "id" | "username"> & {
+        { __typename: "User" } & Pick<User, "id" | "username"> & {
                 articles?: Maybe<
                     { __typename?: "DocumentConnection" } & {
                         edges: Array<
                             Maybe<
                                 { __typename?: "DocumentEdge" } & {
                                     node?: Maybe<
-                                        { __typename?: "Document" } & Pick<
+                                        { __typename: "Document" } & Pick<
                                             Document,
                                             "id" | "created" | "title" | "description"
                                         > & {
+                                                contents: Array<
+                                                    { __typename?: "DocumentSection" } & Pick<
+                                                        DocumentSection,
+                                                        "name" | "content" | "description"
+                                                    > & {
+                                                            template?: Maybe<
+                                                                {
+                                                                    __typename?: "TemplateSection";
+                                                                } & Pick<
+                                                                    TemplateSection,
+                                                                    "name" | "renderType"
+                                                                >
+                                                            >;
+                                                        }
+                                                >;
+                                            }
+                                    >;
+                                }
+                            >
+                        >;
+                    }
+                >;
+                sharedArticles?: Maybe<
+                    { __typename?: "DocumentConnection" } & {
+                        edges: Array<
+                            Maybe<
+                                { __typename?: "DocumentEdge" } & {
+                                    node?: Maybe<
+                                        { __typename: "Document" } & Pick<
+                                            Document,
+                                            "id" | "created" | "title" | "description"
+                                        > & {
+                                                author: { __typename: "User" } & Pick<
+                                                    User,
+                                                    "id" | "username"
+                                                >;
                                                 contents: Array<
                                                     { __typename?: "DocumentSection" } & Pick<
                                                         DocumentSection,
@@ -498,7 +593,22 @@ export type DocumentQueryVariables = {
 
 export type DocumentQuery = { __typename?: "Query" } & {
     document?: Maybe<
-        { __typename?: "Document" } & Pick<Document, "id" | "title" | "description" | "created"> & {
+        { __typename: "Document" } & Pick<
+            Document,
+            "id" | "title" | "description" | "created" | "isAuthor" | "accessPermission"
+        > & {
+                author: { __typename: "User" } & Pick<User, "id" | "username">;
+                privacySettings: { __typename?: "PrivacySettings" } & Pick<
+                    PrivacySettings,
+                    "visibility" | "publicAccessType"
+                > & {
+                        usersAccess: Array<
+                            { __typename?: "UserPrivacySettings" } & Pick<
+                                UserPrivacySettings,
+                                "accessType"
+                            > & { user: { __typename: "User" } & Pick<User, "id" | "username"> }
+                        >;
+                    };
                 contents: Array<
                     { __typename?: "DocumentSection" } & Pick<
                         DocumentSection,
@@ -506,6 +616,25 @@ export type DocumentQuery = { __typename?: "Query" } & {
                     >
                 >;
             }
+    >;
+};
+
+export type SearchByUsernameQueryVariables = {
+    usernameContains: Scalars["String"];
+    meID: Scalars["ID"];
+};
+
+export type SearchByUsernameQuery = { __typename?: "Query" } & {
+    users?: Maybe<
+        { __typename?: "UserConnection" } & {
+            edges: Array<
+                Maybe<
+                    { __typename?: "UserEdge" } & {
+                        node?: Maybe<{ __typename: "User" } & Pick<User, "username" | "id">>;
+                    }
+                >
+            >;
+        }
     >;
 };
 
@@ -830,15 +959,42 @@ export type CreateNewDocumentMutationOptions = ApolloReactCommon.BaseMutationOpt
 export const MeDocument = gql`
     query me {
         me {
+            __typename
             id
             username
             articles {
                 edges {
                     node {
+                        __typename
                         id
                         created
                         title
                         description
+                        contents {
+                            name
+                            content
+                            description
+                            template {
+                                name
+                                renderType
+                            }
+                        }
+                    }
+                }
+            }
+            sharedArticles {
+                edges {
+                    node {
+                        __typename
+                        id
+                        created
+                        title
+                        description
+                        author {
+                            __typename
+                            id
+                            username
+                        }
                         contents {
                             name
                             content
@@ -889,10 +1045,30 @@ export type MeQueryResult = ApolloReactCommon.QueryResult<MeQuery, MeQueryVariab
 export const DocumentDocument = gql`
     query document($id: ID!) {
         document(id: $id) {
+            __typename
             id
             title
             description
             created
+            author {
+                __typename
+                id
+                username
+            }
+            isAuthor
+            accessPermission
+            privacySettings {
+                visibility
+                publicAccessType
+                usersAccess {
+                    user {
+                        __typename
+                        id
+                        username
+                    }
+                    accessType
+                }
+            }
             contents {
                 name
                 description
@@ -939,6 +1115,64 @@ export function withDocument<TProps, TChildProps = {}, TDataName extends string 
 export type DocumentQueryResult = ApolloReactCommon.QueryResult<
     DocumentQuery,
     DocumentQueryVariables
+>;
+export const SearchByUsernameDocument = gql`
+    query searchByUsername($usernameContains: String!, $meID: ID!) {
+        users(username_Icontains: $usernameContains, first: 5, id_Ne: $meID) {
+            edges {
+                node {
+                    __typename
+                    username
+                    id
+                }
+            }
+        }
+    }
+`;
+export type SearchByUsernameComponentProps = Omit<
+    ApolloReactComponents.QueryComponentOptions<
+        SearchByUsernameQuery,
+        SearchByUsernameQueryVariables
+    >,
+    "query"
+> &
+    ({ variables: SearchByUsernameQueryVariables; skip?: boolean } | { skip: boolean });
+
+export const SearchByUsernameComponent = (props: SearchByUsernameComponentProps) => (
+    <ApolloReactComponents.Query<SearchByUsernameQuery, SearchByUsernameQueryVariables>
+        query={SearchByUsernameDocument}
+        {...props}
+    />
+);
+
+export type SearchByUsernameProps<TChildProps = {}, TDataName extends string = "data"> = {
+    [key in TDataName]: ApolloReactHoc.DataValue<
+        SearchByUsernameQuery,
+        SearchByUsernameQueryVariables
+    >;
+} &
+    TChildProps;
+export function withSearchByUsername<TProps, TChildProps = {}, TDataName extends string = "data">(
+    operationOptions?: ApolloReactHoc.OperationOption<
+        TProps,
+        SearchByUsernameQuery,
+        SearchByUsernameQueryVariables,
+        SearchByUsernameProps<TChildProps, TDataName>
+    >
+) {
+    return ApolloReactHoc.withQuery<
+        TProps,
+        SearchByUsernameQuery,
+        SearchByUsernameQueryVariables,
+        SearchByUsernameProps<TChildProps, TDataName>
+    >(SearchByUsernameDocument, {
+        alias: "searchByUsername",
+        ...operationOptions,
+    });
+}
+export type SearchByUsernameQueryResult = ApolloReactCommon.QueryResult<
+    SearchByUsernameQuery,
+    SearchByUsernameQueryVariables
 >;
 
 export interface IntrospectionResultData {
