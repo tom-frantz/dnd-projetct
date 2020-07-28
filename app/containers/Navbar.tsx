@@ -3,9 +3,10 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 import Text from "../components/Text";
 import { StackHeaderProps } from "@react-navigation/stack";
 
-import { useRoute, useNavigation } from "@react-navigation/native";
-import { useTheme } from "@ui-kitten/components";
+import { useRoute, useNavigation, DrawerActions } from "@react-navigation/native";
+import { Icon, useTheme } from "@ui-kitten/components";
 import ToggleTheme from "../components/ToggleTheme";
+import { DocumentSidebar } from "../navigators/DocumentSidebarNavigator";
 
 interface NavbarItemProps {
     name: string;
@@ -53,11 +54,25 @@ const Navbar: React.FC<NavbarProps> = (props: NavbarProps) => {
             style={{
                 flexDirection: "row",
                 backgroundColor: theme["color-primary-500"],
-                paddingHorizontal: 26 + 16,
+                // paddingHorizontal: 26 + 16,
                 justifyContent: "space-between",
             }}
         >
             <View style={{ flexDirection: "row" }}>
+                <TouchableOpacity
+                    style={{
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}
+                    onPress={() => {
+                        navigation.dispatch(DrawerActions.toggleDrawer());
+                    }}
+                >
+                    <Icon
+                        name={"menu-outline"}
+                        style={{ paddingHorizontal: 13, height: 24, width: 24 }}
+                    />
+                </TouchableOpacity>
                 <NavbarItem name={"Home"} routeName={"Landing"} />
                 <NavbarItem name={"Settings"} />
                 <NavbarItem name={"Campaigns"} />

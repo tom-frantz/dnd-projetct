@@ -15,8 +15,6 @@ import { StackNavigationProp, StackScreenProps } from "@react-navigation/stack";
 import { AppStackParamList } from "../navigators/RootNavigator";
 import Button from "../components/Button";
 import Section from "../components/Section";
-import { Icon } from "react-native-elements";
-import { ThemeContext } from "../utils/ThemeContext";
 import { getClient } from "../app/client";
 import ArticleListItem from "../components/ArticleListItem";
 import { Layout } from "@ui-kitten/components";
@@ -65,7 +63,8 @@ const LandingScreen: React.FC<LandingScreenProps> = (props: LandingScreenProps) 
                                 createNewDocument().then((res) => {
                                     if (res.data?.documentCreate?.__typename == "DocumentCreate") {
                                         navigation.push("Document", {
-                                            id: res.data.documentCreate.document.id,
+                                            screen: res.data.documentCreate.document.id,
+                                            params: { id: res.data.documentCreate.document.id },
                                         });
                                     }
                                 });
@@ -85,12 +84,14 @@ const LandingScreen: React.FC<LandingScreenProps> = (props: LandingScreenProps) 
                                 const { title, description, id } = edge.node;
                                 return (
                                     <ArticleListItem
+                                        key={id}
                                         first={index === 0}
                                         title={title}
                                         description={description}
                                         navigateToDocument={() =>
                                             navigation.push("Document", {
-                                                id: (edge.node as { id: string }).id,
+                                                screen: id,
+                                                params: { id: (edge.node as { id: string }).id },
                                             })
                                         }
                                         id={id}
@@ -108,28 +109,30 @@ const LandingScreen: React.FC<LandingScreenProps> = (props: LandingScreenProps) 
                             sharedArticles.edges.map((edge, index) => {
                                 if (edge == undefined || edge.node == undefined) {
                                     return null;
+                                } else {
+                                    const {
+                                        title,
+                                        description,
+                                        id,
+                                        author: { username },
+                                    } = edge.node;
+                                    return (
+                                        <ArticleListItem
+                                            key={id}
+                                            first={index === 0}
+                                            title={title}
+                                            description={description}
+                                            navigateToDocument={() =>
+                                                navigation.push("Document", {
+                                                    screen: id,
+                                                    params: { id },
+                                                })
+                                            }
+                                            authorUsername={username}
+                                            id={id}
+                                        />
+                                    );
                                 }
-
-                                const {
-                                    title,
-                                    description,
-                                    id,
-                                    author: { username },
-                                } = edge.node;
-                                return (
-                                    <ArticleListItem
-                                        first={index === 0}
-                                        title={title}
-                                        description={description}
-                                        navigateToDocument={() =>
-                                            navigation.push("Document", {
-                                                id: (edge.node as { id: string }).id,
-                                            })
-                                        }
-                                        authorUsername={username}
-                                        id={id}
-                                    />
-                                );
                             })}
                     </View>
                 </Section>

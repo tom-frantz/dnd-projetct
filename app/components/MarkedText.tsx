@@ -82,15 +82,25 @@ const MarkedText: React.FC<MarkedTextProps> = (props: MarkedTextProps) => {
                 }
             } else if (node.type === "text") {
                 renderedNodes.push(
-                    <Text bold={bolded} style={[italics && { fontStyle: "italic" }]}>
+                    <Text
+                        key={node.text}
+                        bold={bolded}
+                        style={[italics && { fontStyle: "italic" }]}
+                    >
                         {node.text}
                     </Text>
                 );
             } else if (node.type === "link") {
                 renderedNodes.push(
                     <Text
+                        key={node.text}
                         // @ts-ignore
-                        onPress={() => navigation.push("Document", { id: node.link })}
+                        onPress={() =>
+                            navigation.push("Document", {
+                                screen: node.link,
+                                params: { id: node.link },
+                            })
+                        }
                         bold={bolded}
                         style={[
                             italics && { fontStyle: "italic" },

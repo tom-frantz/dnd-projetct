@@ -104,3 +104,19 @@ const searchByUsername = gql`
         }
     }
 `;
+
+const getMyDocuments = gql`
+    query getMyDocuments {
+        me {
+            articles {
+                edges {
+                    node {
+                        id
+                        title
+                        description
+                    }
+                }
+            }
+        }
+    }
+`;

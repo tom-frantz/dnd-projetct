@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from "react";
-
 import { ApolloProvider } from "@apollo/react-hooks";
+import { ActivityIndicator, Platform, View } from "react-native";
 
-import { getClient } from "./app/app/client";
+import { ApplicationProvider, IconRegistry } from "@ui-kitten/components";
+import * as eva from "@eva-design/material";
+import { myTheme as customTheme } from "./custom-theme";
+//@ts-ignore
+import mappings from "./mapping.json";
+import { EvaIconsPack } from "@ui-kitten/eva-icons";
 import {
     AuthContext,
     getAccessToken,
@@ -12,29 +17,11 @@ import {
     setRefreshToken,
     removeRefreshToken,
 } from "./app/app/auth";
-import LandingScreen from "./app/screens/LandingScreen";
-import { ActivityIndicator, Platform, View } from "react-native";
+import { getClient } from "./app/app/client";
 import { loadFonts } from "./app/app/fonts";
-
-import { NavigationContainer } from "@react-navigation/native";
-import { createStackNavigator } from "@react-navigation/stack";
-
-import * as eva from "@eva-design/material";
-import { ApplicationProvider, IconRegistry, Layout } from "@ui-kitten/components";
-
-import LoginScreen from "./app/screens/LoginScreen";
-import DocumentScreen from "./app/screens/DocumentScreen";
-import Text from "./app/components/Text";
-import Navbar from "./app/containers/Navbar";
-import RegisterScreen from "./app/screens/RegisterScreen";
-import { myTheme as customTheme } from "./custom-theme";
-//@ts-ignore
-import expoAppJson from "./app.json";
-//@ts-ignore
-import mappings from "./mapping.json";
-import { EvaIconsPack } from "@ui-kitten/eva-icons";
 import RootNavigator from "./app/navigators/RootNavigator";
 import { ThemeContext } from "./app/utils/ThemeContext";
+import AsyncStorage from "@react-native-community/async-storage";
 
 const App: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
@@ -45,11 +32,19 @@ const App: React.FC = () => {
         Promise.all([
             loadFonts(),
             getAccessToken().then((token) => setReactToken(token || undefined)),
+            // Defaults to light theme.
+            AsyncStorage.getItem("theme").then((value) =>
+                setCurrentTheme(value === "dark" ? "dark" : "light")
+            ),
             // new Promise((resolve) => setTimeout(resolve, 4000)),
         ]).then(() => {
             setLoading(false);
         });
     }, []);
+
+    useEffect(() => {
+        AsyncStorage.setItem("theme", currentTheme);
+    }, [currentTheme]);
 
     return (
         <AuthContext.Provider

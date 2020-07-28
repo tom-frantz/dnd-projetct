@@ -3,7 +3,7 @@ import React from "react";
 import LandingScreen from "../../app/screens/LandingScreen";
 import { Platform } from "react-native";
 
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, getPathFromState, getStateFromPath } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 
 import { Layout, useTheme } from "@ui-kitten/components";
@@ -16,6 +16,15 @@ import RegisterScreen from "../../app/screens/RegisterScreen";
 //@ts-ignore
 import expoAppJson from "../../app.json";
 import CampaignScreen from "../screens/CampaignScreen";
+import DocumentSidebarNavigator, { DocumentSidebarParamList } from "./DocumentSidebarNavigator";
+import { NestedNavigatorParams } from "./utils";
+import { useQuery } from "@apollo/react-hooks";
+import {
+    GetMyDocumentsDocument,
+    GetMyDocumentsQuery,
+    GetMyDocumentsQueryVariables,
+} from "../graph/graphql";
+import ThemedActivityIndicator from "../components/ThemedActivityIndicator";
 
 interface RootNavigatorProps {
     accessToken: string | undefined;
@@ -25,7 +34,7 @@ export type AppStackParamList = {
     Login: undefined;
     Register: undefined;
     Landing: undefined;
-    Document: { id: string };
+    Document: NestedNavigatorParams<DocumentSidebarParamList>;
     Campaigns: undefined;
 };
 
@@ -35,6 +44,19 @@ const RootNavigator: React.FC<RootNavigatorProps> = (props: RootNavigatorProps) 
     const { accessToken } = props;
     const theme = useTheme();
     console.log("THEME", theme);
+
+    // The problem basically went that it was document/{randomUUID} that the navigator could not resolve down to an actual page
+    // It then defaulted back to the landing page, which would break the url for that session.
+    // This ensures that the data for the ./DocumentSidebarNavigator.tsx is present and ready when loading a url from the searchbar.
+
+    // Do not remove this code, Future Tom.
+    const { data, loading, error } = useQuery<GetMyDocumentsQuery, GetMyDocumentsQueryVariables>(
+        GetMyDocumentsDocument
+    );
+
+    if (loading || error) {
+        return <ThemedActivityIndicator />;
+    }
 
     return (
         <NavigationContainer
@@ -51,11 +73,39 @@ const RootNavigator: React.FC<RootNavigatorProps> = (props: RootNavigatorProps) 
             linking={
                 Platform.OS === "web"
                     ? {
-                          prefixes: [],
+                          prefixes: ["http://localhost:19006"],
                           config: {
                               Login: "login",
                               Landing: "landing",
-                              Document: "document/:id",
+                          },
+                          getStateFromPath: (path, options) => {
+                              const splitPath = path.split("/");
+                              if (splitPath.length === 3 && splitPath[1] === "document") {
+                                  const newPath = `/Document/${splitPath[2]}?d=${splitPath[2]}`;
+                                  return getStateFromPath(newPath, options);
+                              }
+                              return getStateFromPath(path, options);
+                          },
+                          getPathFromState: (state, config) => {
+                              const getPathPart = (statePart: any) => {
+                                  if (
+                                      statePart?.routes != undefined &&
+                                      statePart?.index != undefined
+                                  ) {
+                                      return statePart.routes[statePart.index];
+                                  }
+                                  return undefined;
+                              };
+
+                              const docPartMaybe = getPathPart(state);
+                              if (docPartMaybe?.name === "Document") {
+                                  const docID = getPathPart(docPartMaybe?.state);
+                                  if (docID?.name != undefined) {
+                                      return "/document/" + docID.name;
+                                  }
+                              }
+
+                              return getPathFromState(state, config);
                           },
                       }
                     : undefined
@@ -80,11 +130,7 @@ const RootNavigator: React.FC<RootNavigatorProps> = (props: RootNavigatorProps) 
                     {accessToken !== undefined && (
                         <>
                             <Stack.Screen name={"Landing"} component={LandingScreen} />
-                            <Stack.Screen
-                                name={"Document"}
-                                component={DocumentScreen}
-                                initialParams={{ id: "" }}
-                            />
+                            <Stack.Screen name={"Document"} component={DocumentSidebarNavigator} />
                             <Stack.Screen name={"Campaigns"} component={CampaignScreen} />
                         </>
                     )}

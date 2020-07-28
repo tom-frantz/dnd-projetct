@@ -1,9 +1,9 @@
-import React, { useContext, useEffect, useState } from "react";
-import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
-import { StackNavigationProp, StackScreenProps } from "@react-navigation/stack";
+import React, { useState } from "react";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { StackScreenProps } from "@react-navigation/stack";
 import { AppStackParamList } from "../navigators/RootNavigator";
 import Text from "../components/Text";
-import { useQuery, useMutation } from "@apollo/react-hooks";
+import { useMutation, useQuery } from "@apollo/react-hooks";
 import {
     DocumentDocument,
     DocumentQuery,
@@ -14,20 +14,21 @@ import {
 } from "../graph/graphql";
 import moment from "moment";
 import ContentSection from "../containers/ContentSection";
-import { Formik, FormikErrors, useFormik } from "formik";
+import { Formik } from "formik";
 import * as Yup from "yup";
 import { EditingContext } from "../utils/EditingContext";
-import { ThemeContext } from "../utils/ThemeContext";
 import Button from "../components/Button";
 import Scrollbars from "react-custom-scrollbars";
 import Section from "../components/Section";
 import EditText from "../components/EditText";
-import { Card, Icon, Layout, Modal, Select, SelectItem, useTheme } from "@ui-kitten/components";
+import { Icon, Layout, useTheme } from "@ui-kitten/components";
 import Toast from "react-native-root-toast";
 import ShareModal from "../containers/ShareModal";
 import _ from "lodash";
+import ThemedActivityIndicator from "../components/ThemedActivityIndicator";
+import { DocumentSidebarParamList } from "../navigators/DocumentSidebarNavigator";
 
-interface DocumentScreenProps extends StackScreenProps<AppStackParamList, "Document"> {}
+interface DocumentScreenProps extends StackScreenProps<DocumentSidebarParamList, "Document"> {}
 
 const validationSchema = Yup.object({
     title: Yup.string().required("title is a required field."),
@@ -61,6 +62,10 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
         DocumentUpdateMutation,
         DocumentUpdateMutationVariables
     >(DocumentUpdateDocument);
+
+    if (loading) {
+        return <ThemedActivityIndicator />;
+    }
 
     if (data == undefined || data.document == undefined) {
         return <Text>This is quirky</Text>;
@@ -223,9 +228,14 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
                                             )}
                                         </View>
                                         {!editing && (
-                                            <>
+                                            <View
+                                                style={{
+                                                    flexDirection: "column",
+                                                    justifyContent: "space-between",
+                                                }}
+                                            >
                                                 <Button
-                                                    style={{ alignSelf: "flex-start" }}
+                                                    style={{ alignSelf: "flex-end" }}
                                                     onPress={() => {
                                                         setShareModalVisible(true);
                                                     }}
@@ -266,7 +276,7 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
                                                 {/*        }}*/}
                                                 {/*    />*/}
                                                 {/*</TouchableOpacity>*/}
-                                            </>
+                                            </View>
                                         )}
                                         {/*{editing && (*/}
                                         {/*    <TouchableOpacity*/}
@@ -291,6 +301,7 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
                                 {values.contents.map((content, index, array) => {
                                     return (
                                         <ContentSection
+                                            key={index}
                                             last={index + 1 == array.length && !editing}
                                             fieldName={`contents[${index}]`}
                                             removeSection={() => {

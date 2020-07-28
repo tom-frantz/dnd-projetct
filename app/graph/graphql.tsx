@@ -638,6 +638,31 @@ export type SearchByUsernameQuery = { __typename?: "Query" } & {
     >;
 };
 
+export type GetMyDocumentsQueryVariables = {};
+
+export type GetMyDocumentsQuery = { __typename?: "Query" } & {
+    me?: Maybe<
+        { __typename?: "User" } & {
+            articles?: Maybe<
+                { __typename?: "DocumentConnection" } & {
+                    edges: Array<
+                        Maybe<
+                            { __typename?: "DocumentEdge" } & {
+                                node?: Maybe<
+                                    { __typename?: "Document" } & Pick<
+                                        Document,
+                                        "id" | "title" | "description"
+                                    >
+                                >;
+                            }
+                        >
+                    >;
+                }
+            >;
+        }
+    >;
+};
+
 export const LoginDocument = gql`
     mutation login($username: String!, $password: String!) {
         login(username: $username, password: $password) {
@@ -1173,6 +1198,59 @@ export function withSearchByUsername<TProps, TChildProps = {}, TDataName extends
 export type SearchByUsernameQueryResult = ApolloReactCommon.QueryResult<
     SearchByUsernameQuery,
     SearchByUsernameQueryVariables
+>;
+export const GetMyDocumentsDocument = gql`
+    query getMyDocuments {
+        me {
+            articles {
+                edges {
+                    node {
+                        id
+                        title
+                        description
+                    }
+                }
+            }
+        }
+    }
+`;
+export type GetMyDocumentsComponentProps = Omit<
+    ApolloReactComponents.QueryComponentOptions<GetMyDocumentsQuery, GetMyDocumentsQueryVariables>,
+    "query"
+>;
+
+export const GetMyDocumentsComponent = (props: GetMyDocumentsComponentProps) => (
+    <ApolloReactComponents.Query<GetMyDocumentsQuery, GetMyDocumentsQueryVariables>
+        query={GetMyDocumentsDocument}
+        {...props}
+    />
+);
+
+export type GetMyDocumentsProps<TChildProps = {}, TDataName extends string = "data"> = {
+    [key in TDataName]: ApolloReactHoc.DataValue<GetMyDocumentsQuery, GetMyDocumentsQueryVariables>;
+} &
+    TChildProps;
+export function withGetMyDocuments<TProps, TChildProps = {}, TDataName extends string = "data">(
+    operationOptions?: ApolloReactHoc.OperationOption<
+        TProps,
+        GetMyDocumentsQuery,
+        GetMyDocumentsQueryVariables,
+        GetMyDocumentsProps<TChildProps, TDataName>
+    >
+) {
+    return ApolloReactHoc.withQuery<
+        TProps,
+        GetMyDocumentsQuery,
+        GetMyDocumentsQueryVariables,
+        GetMyDocumentsProps<TChildProps, TDataName>
+    >(GetMyDocumentsDocument, {
+        alias: "getMyDocuments",
+        ...operationOptions,
+    });
+}
+export type GetMyDocumentsQueryResult = ApolloReactCommon.QueryResult<
+    GetMyDocumentsQuery,
+    GetMyDocumentsQueryVariables
 >;
 
 export interface IntrospectionResultData {

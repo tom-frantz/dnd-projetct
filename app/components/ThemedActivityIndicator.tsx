@@ -1,11 +1,14 @@
-import React from "react";
+import React, { useContext } from "react";
 import { ActivityIndicator } from "react-native";
+import { ThemeContext } from "../utils/ThemeContext";
 
 interface ThemedActivityIndicatorProps {}
 
 const ThemedActivityIndicator: React.FC<ThemedActivityIndicatorProps> = (
     props: ThemedActivityIndicatorProps
 ) => {
+    const { currentTheme } = useContext(ThemeContext);
+
     return (
         <ActivityIndicator
             style={{
