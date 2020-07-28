@@ -12,7 +12,7 @@ import {
 } from "../graph/graphql";
 import { AuthContext } from "../app/auth";
 import { StackNavigationProp, StackScreenProps } from "@react-navigation/stack";
-import { AppStackParamList } from "../../App";
+import { AppStackParamList } from "../navigators/RootNavigator";
 import Button from "../components/Button";
 import Section from "../components/Section";
 import { Icon } from "react-native-elements";
@@ -20,13 +20,13 @@ import { ThemeContext } from "../utils/ThemeContext";
 import { getClient } from "../app/client";
 import ArticleListItem from "../components/ArticleListItem";
 import { Layout } from "@ui-kitten/components";
+import Scrollbars from "react-custom-scrollbars";
 
 interface LandingScreenProps extends StackScreenProps<AppStackParamList, "Landing"> {}
 
 const LandingScreen: React.FC<LandingScreenProps> = (props: LandingScreenProps) => {
     const { navigation } = props;
     const { token, setTokens, clearTokens } = useContext(AuthContext);
-    const { primaryColour } = useContext(ThemeContext);
 
     const { data, loading, error, refetch } = useQuery<MeQuery, MeQueryVariables>(MeDocument);
 
@@ -51,97 +51,99 @@ const LandingScreen: React.FC<LandingScreenProps> = (props: LandingScreenProps) 
 
     return (
         <Layout level={"4"} style={styles.container}>
-            <Section first>
-                <Text title>{username}</Text>
-            </Section>
-            <Section>
-                <View style={{ flexDirection: "row" }}>
-                    <Text style={{ marginRight: 13, flexGrow: 1 }} heading>
-                        Articles
+            <Scrollbars autoHide={true}>
+                <Section first>
+                    <Text category={"h1"}>{username}</Text>
+                </Section>
+                <Section>
+                    <View style={{ flexDirection: "row" }}>
+                        <Text style={{ marginRight: 13, flexGrow: 1 }} category={"h1"}>
+                            Articles
+                        </Text>
+                        <Button
+                            onPress={() => {
+                                createNewDocument().then((res) => {
+                                    if (res.data?.documentCreate?.__typename == "DocumentCreate") {
+                                        navigation.push("Document", {
+                                            id: res.data.documentCreate.document.id,
+                                        });
+                                    }
+                                });
+                            }}
+                            style={{ alignSelf: "flex-start" }}
+                        >
+                            Create
+                        </Button>
+                    </View>
+                    <View>
+                        {articles &&
+                            articles.edges.map((edge, index) => {
+                                if (edge == undefined || edge.node == undefined) {
+                                    return null;
+                                }
+
+                                const { title, description, id } = edge.node;
+                                return (
+                                    <ArticleListItem
+                                        first={index === 0}
+                                        title={title}
+                                        description={description}
+                                        navigateToDocument={() =>
+                                            navigation.push("Document", {
+                                                id: (edge.node as { id: string }).id,
+                                            })
+                                        }
+                                        id={id}
+                                    />
+                                );
+                            })}
+                    </View>
+                </Section>
+                <Section>
+                    <Text style={{ marginRight: 13, flexGrow: 1 }} category={"h1"}>
+                        Shared with you
                     </Text>
+                    <View>
+                        {sharedArticles &&
+                            sharedArticles.edges.map((edge, index) => {
+                                if (edge == undefined || edge.node == undefined) {
+                                    return null;
+                                }
+
+                                const {
+                                    title,
+                                    description,
+                                    id,
+                                    author: { username },
+                                } = edge.node;
+                                return (
+                                    <ArticleListItem
+                                        first={index === 0}
+                                        title={title}
+                                        description={description}
+                                        navigateToDocument={() =>
+                                            navigation.push("Document", {
+                                                id: (edge.node as { id: string }).id,
+                                            })
+                                        }
+                                        authorUsername={username}
+                                        id={id}
+                                    />
+                                );
+                            })}
+                    </View>
+                </Section>
+                <Section last>
                     <Button
                         onPress={() => {
-                            createNewDocument().then((res) => {
-                                if (res.data?.documentCreate?.__typename == "DocumentCreate") {
-                                    navigation.navigate("Document", {
-                                        id: res.data.documentCreate.document.id,
-                                    });
-                                }
-                            });
+                            getClient().clearStore();
+                            clearTokens();
                         }}
-                        style={{ alignSelf: "flex-start" }}
                     >
-                        Create
+                        Logout
                     </Button>
-                </View>
-                <View>
-                    {articles &&
-                        articles.edges.map((edge, index) => {
-                            if (edge == undefined || edge.node == undefined) {
-                                return null;
-                            }
-
-                            const { title, description, id } = edge.node;
-                            return (
-                                <ArticleListItem
-                                    first={index === 0}
-                                    title={title}
-                                    description={description}
-                                    navigateToDocument={() =>
-                                        navigation.navigate("Document", {
-                                            id: (edge.node as { id: string }).id,
-                                        })
-                                    }
-                                    id={id}
-                                />
-                            );
-                        })}
-                </View>
-            </Section>
-            <Section>
-                <Text style={{ marginRight: 13, flexGrow: 1 }} heading>
-                    Shared with you
-                </Text>
-                <View>
-                    {sharedArticles &&
-                        sharedArticles.edges.map((edge, index) => {
-                            if (edge == undefined || edge.node == undefined) {
-                                return null;
-                            }
-
-                            const {
-                                title,
-                                description,
-                                id,
-                                author: { username },
-                            } = edge.node;
-                            return (
-                                <ArticleListItem
-                                    first={index === 0}
-                                    title={title}
-                                    description={description}
-                                    navigateToDocument={() =>
-                                        navigation.navigate("Document", {
-                                            id: (edge.node as { id: string }).id,
-                                        })
-                                    }
-                                    authorUsername={username}
-                                    id={id}
-                                />
-                            );
-                        })}
-                </View>
-            </Section>
-            <Section last>
-                <Button
-                    onPress={() => {
-                        getClient().clearStore();
-                        clearTokens();
-                    }}
-                >
-                    Logout
-                </Button>
-            </Section>
+                </Section>
+            </Scrollbars>
         </Layout>
     );
 };

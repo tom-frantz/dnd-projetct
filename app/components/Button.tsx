@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import Text from "./Text";
 import { ThemeContext } from "../utils/ThemeContext";
+import { useTheme } from "@ui-kitten/components";
 
 interface ButtonProps extends TouchableOpacityProps {
     children: any;
@@ -17,18 +18,28 @@ interface ButtonProps extends TouchableOpacityProps {
 
 const Button: React.FC<ButtonProps> = (props: ButtonProps) => {
     const { children, style, danger, ...others } = props;
-    const { buttonContainer, buttonFont, dangerColour } = useContext(ThemeContext);
+    const theme = useTheme();
 
     return (
         <TouchableOpacity
             style={[
-                buttonContainer,
-                danger && { backgroundColor: dangerColour, borderColor: dangerColour },
+                {
+                    borderWidth: 1,
+                    borderRadius: 6.5,
+                    padding: 6.5,
+                    borderColor: theme["color-primary-500"],
+                    backgroundColor: theme["color-primary-500"],
+                    width: "fit-content",
+                },
+                danger && {
+                    backgroundColor: theme["color-danger-500"],
+                    borderColor: theme["color-danger-400"],
+                },
                 style,
             ]}
             {...others}
         >
-            <Text style={buttonFont}>{children}</Text>
+            <Text style={{ color: "#000" }}>{children}</Text>
         </TouchableOpacity>
     );
 };

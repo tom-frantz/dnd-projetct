@@ -13,6 +13,7 @@ import { useNavigation } from "@react-navigation/native";
 import { ThemeContext } from "../utils/ThemeContext";
 import Button from "../components/Button";
 import FormikTextField from "../components/form/FormikTextField";
+import { Layout, useTheme } from "@ui-kitten/components";
 
 interface LoginScreenProps {}
 
@@ -23,17 +24,17 @@ const validationSchema = Yup.object({
 
 const LoginScreen: React.FC<LoginScreenProps> = (props: LoginScreenProps) => {
     const { setTokens } = useContext(AuthContext);
-    const { dangerColour } = useContext(ThemeContext);
 
     const [login, { loading }] = useMutation<LoginMutation, LoginMutationVariables>(LoginDocument);
 
+    const theme = useTheme();
     const navigation = useNavigation();
 
     return (
-        <View style={{ alignItems: "center", margin: 13 * 4 }}>
-            <Text title>DnD Projetct</Text>
+        <Layout level={"4"} style={{ alignItems: "center", padding: 13 * 4 }}>
+            <Text category={"h1"}>Pocket Dimension</Text>
             <Section style={{ width: 400, alignSelf: "center", margin: 13 * 4 }} first last>
-                <Text heading>Login</Text>
+                <Text category={"h1"}>Login</Text>
                 <Formik
                     initialValues={{ username: "", password: "" }}
                     validationSchema={validationSchema}
@@ -78,7 +79,11 @@ const LoginScreen: React.FC<LoginScreenProps> = (props: LoginScreenProps) => {
                                     style={{ alignSelf: "stretch" }}
                                     passwordField
                                 />
-                                {status && <Text style={{ color: dangerColour }}>{status}</Text>}
+                                {status && (
+                                    <Text style={{ color: theme["color-danger-500"] }}>
+                                        {status}
+                                    </Text>
+                                )}
                             </View>
                             <View
                                 style={{
@@ -108,7 +113,7 @@ const LoginScreen: React.FC<LoginScreenProps> = (props: LoginScreenProps) => {
                     )}
                 </Formik>
             </Section>
-        </View>
+        </Layout>
     );
 };
 

@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { StackNavigationProp, StackScreenProps } from "@react-navigation/stack";
-import { AppStackParamList } from "../../App";
+import { AppStackParamList } from "../navigators/RootNavigator";
 import Text from "../components/Text";
 import { useQuery, useMutation } from "@apollo/react-hooks";
 import {
@@ -22,7 +22,7 @@ import Button from "../components/Button";
 import Scrollbars from "react-custom-scrollbars";
 import Section from "../components/Section";
 import EditText from "../components/EditText";
-import { Card, Icon, Layout, Modal, Select, SelectItem } from "@ui-kitten/components";
+import { Card, Icon, Layout, Modal, Select, SelectItem, useTheme } from "@ui-kitten/components";
 import Toast from "react-native-root-toast";
 import ShareModal from "../containers/ShareModal";
 import _ from "lodash";
@@ -30,13 +30,13 @@ import _ from "lodash";
 interface DocumentScreenProps extends StackScreenProps<AppStackParamList, "Document"> {}
 
 const validationSchema = Yup.object({
-    title: Yup.string().required(),
+    title: Yup.string().required("title is a required field."),
     description: Yup.string().nullable(),
     contents: Yup.array(
         Yup.object({
             name: Yup.string().required("name is a required field."),
-            description: Yup.string(),
-            content: Yup.string(),
+            description: Yup.string().nullable(),
+            content: Yup.string().nullable(),
         }).required()
     ).ensure(),
 });
@@ -47,8 +47,7 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
             params: { id },
         },
     } = props;
-
-    const { titleFont, subtitleFont, primaryColour, dangerColour } = useContext(ThemeContext);
+    const theme = useTheme();
 
     const [editing, setEditing] = useState<boolean>(false);
     const [shareModalVisible, setShareModalVisible] = useState<boolean>(false);
@@ -111,90 +110,96 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
                 }}
             />
             <Scrollbars autoHide={true}>
-                <EditingContext.Provider value={{ editing }}>
-                    <Formik
-                        initialValues={{
-                            title,
-                            description,
-                            contents,
-                        }}
-                        // Needed as the contents are rendered from the current formik values
-                        // This is in place to display something even if it's not saved ...
-                        // Not sure why'd we do that but oh well.
+                <Formik
+                    initialValues={{
+                        title,
+                        description,
+                        contents,
+                    }}
+                    // Needed as the contents are rendered from the current formik values
+                    // This is in place to display something even if it's not saved ...
+                    // Not sure why'd we do that but oh well.
 
-                        // TODO potentially shift from formik values to Apollo values.
-                        enableReinitialize
-                        onSubmit={async (values) => {
-                            let toast = Toast.show("Submitting", {
-                                duration: -1,
-                                position: Toast.positions.BOTTOM,
-                                shadow: true,
-                                backgroundColor: primaryColour,
-                                animation: true,
-                                opacity: 1,
-                                hideOnPress: false,
-                            });
+                    // TODO potentially shift from formik values to Apollo values.
+                    enableReinitialize
+                    onSubmit={async (values) => {
+                        let toast = Toast.show("Submitting", {
+                            duration: -1,
+                            position: Toast.positions.BOTTOM,
+                            shadow: true,
+                            backgroundColor: theme["color-primary-500"],
+                            textColor: "#000",
+                            animation: true,
+                            opacity: 1,
+                            hideOnPress: false,
+                        });
 
-                            return documentUpdate({
-                                variables: {
-                                    id,
-                                    input: {
-                                        title: values.title,
-                                        description: values.description,
-                                        contents:
-                                            values.contents != undefined
-                                                ? values.contents.map((content) => ({
-                                                      name: content.name,
-                                                      description: content.description,
-                                                      content: content.content,
-                                                  }))
-                                                : values.contents,
-                                    },
+                        return documentUpdate({
+                            variables: {
+                                id,
+                                input: {
+                                    title: values.title,
+                                    description: values.description,
+                                    contents:
+                                        values.contents != undefined
+                                            ? values.contents.map((content) => ({
+                                                  name: content.name,
+                                                  description: content.description,
+                                                  content: content.content,
+                                              }))
+                                            : values.contents,
                                 },
-                                refetchQueries: [{ query: DocumentDocument, variables: { id } }],
-                            })
-                                .then((data) => {
-                                    setEditing(false);
-                                    Toast.hide(toast);
-                                    Toast.show("Submitted!", {
-                                        duration: Toast.durations.SHORT,
-                                        position: Toast.positions.BOTTOM,
-                                        shadow: true,
-                                        backgroundColor: primaryColour,
-                                        animation: true,
-                                        opacity: 1,
-                                    });
-                                    return data;
-                                })
-                                .catch((e) => {
-                                    Toast.hide(toast);
-                                    Toast.show(e.message, {
-                                        duration: Toast.durations.LONG,
-                                        position: Toast.positions.BOTTOM,
-                                        shadow: false,
-                                        backgroundColor: dangerColour,
-                                        animation: true,
-                                        opacity: 1,
-                                    });
-                                    console.error(e);
+                            },
+                            refetchQueries: [{ query: DocumentDocument, variables: { id } }],
+                        })
+                            .then((data) => {
+                                setEditing(false);
+                                Toast.hide(toast);
+                                Toast.show("Submitted!", {
+                                    duration: Toast.durations.SHORT,
+                                    position: Toast.positions.BOTTOM,
+                                    shadow: true,
+                                    backgroundColor: theme["color-primary-500"],
+                                    textColor: "#000",
+                                    animation: true,
+                                    opacity: 1,
                                 });
-                        }}
-                        validationSchema={validationSchema}
-                    >
-                        {({ setFieldValue, values, handleSubmit }) => (
-                            <>
+                                return data;
+                            })
+                            .catch((e) => {
+                                Toast.hide(toast);
+                                Toast.show(e.message, {
+                                    duration: Toast.durations.LONG,
+                                    position: Toast.positions.BOTTOM,
+                                    shadow: false,
+                                    backgroundColor: theme["color-danger-500"],
+                                    textColor: "#000",
+                                    animation: true,
+                                    opacity: 1,
+                                });
+                                console.error(e);
+                            });
+                    }}
+                    validationSchema={validationSchema}
+                >
+                    {({ setFieldValue, values, handleSubmit }) => (
+                        <>
+                            <EditingContext.Provider
+                                value={{
+                                    startUpdate: () => {
+                                        handleSubmit();
+                                    },
+                                }}
+                            >
                                 <Section first>
                                     <View style={{ flexDirection: "row", width: "100%" }}>
                                         <View style={{ flex: 1 }}>
                                             <EditText
                                                 fieldName={"title"}
-                                                style={titleFont}
+                                                category={"h1"}
                                                 editStyle={{ textTransform: "none" }}
                                             />
-                                            <EditText
-                                                fieldName={"description"}
-                                                style={subtitleFont}
-                                            />
+                                            <EditText fieldName={"description"} category={"s1"} />
                                             {!editing && (
                                                 <>
                                                     <Text>
@@ -229,38 +234,57 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
                                                 </Button>
                                                 <TouchableOpacity
                                                     onPress={() => {
-                                                        setEditing(!editing);
+                                                        values.contents.splice(0, 0, {
+                                                            name: "Untitled Section",
+                                                        });
+                                                        setFieldValue("contents", values.contents);
                                                     }}
+                                                    style={{ alignSelf: "flex-end" }}
                                                 >
                                                     <Icon
-                                                        name={"settings-2-outline"}
-                                                        fill={primaryColour}
+                                                        name={"plus-outline"}
+                                                        fill={theme["color-primary-500"]}
                                                         style={{
                                                             width: 24,
                                                             height: 24,
-                                                            marginLeft: 13,
+                                                            alignSelf: "flex-end",
                                                         }}
                                                     />
                                                 </TouchableOpacity>
+                                                {/*<TouchableOpacity*/}
+                                                {/*    onPress={() => {*/}
+                                                {/*        setEditing(!editing);*/}
+                                                {/*    }}*/}
+                                                {/*>*/}
+                                                {/*    <Icon*/}
+                                                {/*        name={"settings-2-outline"}*/}
+                                                {/*        fill={theme["color-primary-500"]}*/}
+                                                {/*        style={{*/}
+                                                {/*            width: 24,*/}
+                                                {/*            height: 24,*/}
+                                                {/*            marginLeft: 13,*/}
+                                                {/*        }}*/}
+                                                {/*    />*/}
+                                                {/*</TouchableOpacity>*/}
                                             </>
                                         )}
-                                        {editing && (
-                                            <TouchableOpacity
-                                                onPress={() => {
-                                                    handleSubmit();
-                                                }}
-                                            >
-                                                <Icon
-                                                    name={"checkmark-outline"}
-                                                    fill={primaryColour}
-                                                    style={{
-                                                        width: 24,
-                                                        height: 24,
-                                                        marginLeft: 13,
-                                                    }}
-                                                />
-                                            </TouchableOpacity>
-                                        )}
+                                        {/*{editing && (*/}
+                                        {/*    <TouchableOpacity*/}
+                                        {/*        onPress={() => {*/}
+                                        {/*            handleSubmit();*/}
+                                        {/*        }}*/}
+                                        {/*    >*/}
+                                        {/*        <Icon*/}
+                                        {/*            name={"checkmark-outline"}*/}
+                                        {/*            fill={theme["color-primary-500"]}*/}
+                                        {/*            style={{*/}
+                                        {/*                width: 24,*/}
+                                        {/*                height: 24,*/}
+                                        {/*                marginLeft: 13,*/}
+                                        {/*            }}*/}
+                                        {/*        />*/}
+                                        {/*    </TouchableOpacity>*/}
+                                        {/*)}*/}
                                     </View>
                                 </Section>
 
@@ -276,6 +300,45 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
                                                         (_, otherIndex) => index != otherIndex
                                                     )
                                                 );
+                                                handleSubmit();
+                                            }}
+                                            addContentUnder={() => {
+                                                values.contents.splice(index + 1, 0, {
+                                                    name: "Untitled Section",
+                                                });
+                                                setFieldValue("contents", values.contents);
+                                                handleSubmit();
+                                            }}
+                                            duplicateContent={() => {
+                                                values.contents.splice(
+                                                    index + 1,
+                                                    0,
+                                                    _.clone(values.contents[index])
+                                                );
+                                                setFieldValue("contents", values.contents);
+                                                handleSubmit();
+                                            }}
+                                            moveContentUp={() => {
+                                                if (index > 0) {
+                                                    values.contents.splice(
+                                                        index - 1,
+                                                        0,
+                                                        values.contents.splice(index, 1)[0]
+                                                    );
+                                                    setFieldValue("contents", values.contents);
+                                                    handleSubmit();
+                                                }
+                                            }}
+                                            moveContentDown={() => {
+                                                if (index + 1 < array.length) {
+                                                    values.contents.splice(
+                                                        index + 1,
+                                                        0,
+                                                        values.contents.splice(index, 1)[0]
+                                                    );
+                                                    setFieldValue("contents", values.contents);
+                                                    handleSubmit();
+                                                }
                                             }}
                                         />
                                     );
@@ -304,10 +367,10 @@ const DocumentScreen: React.FC<DocumentScreenProps> = (props: DocumentScreenProp
                                         </Button>
                                     </Section>
                                 )}
-                            </>
-                        )}
-                    </Formik>
-                </EditingContext.Provider>
+                            </EditingContext.Provider>
+                        </>
+                    )}
+                </Formik>
             </Scrollbars>
         </Layout>
     );

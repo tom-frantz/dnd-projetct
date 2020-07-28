@@ -9,26 +9,40 @@ import { useNavigation } from "@react-navigation/native";
 
 // @ts-ignore
 import Parser from "simple-text-parser";
-import { Icon } from "@ui-kitten/components";
+import { Icon, useTheme, Text as KText } from "@ui-kitten/components";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { AppStackParamList } from "../navigators/RootNavigator";
+import MarkedText from "../components/MarkedText";
 
 interface ContentSectionProps {
     fieldName: string;
 
     last?: boolean;
     removeSection(): void;
+    addContentUnder(): void;
+    duplicateContent(): void;
+    moveContentUp(): void;
+    moveContentDown(): void;
 }
 
 const ContentSection: React.FC<ContentSectionProps> = (props: ContentSectionProps) => {
-    const { headingFont, primaryColour } = useContext(ThemeContext);
-    const { fieldName, last, removeSection } = props;
+    const {
+        fieldName,
+        last,
+        removeSection,
+        addContentUnder,
+        duplicateContent,
+        moveContentDown,
+        moveContentUp,
+    } = props;
 
-    const navigation = useNavigation();
-    const { editing } = useContext(EditingContext);
+    const navigation = useNavigation<StackNavigationProp<AppStackParamList>>();
+    const theme = useTheme();
 
-    const renderSudoMarkdown = (value: string): React.ReactNode => {
+    const renderSudoMarkdown = (value: string, setEditingTrue: () => void): React.ReactNode => {
         const parser = new Parser();
 
-        parser.addRule(/\[b\](.)*?\[\/b\]/gs, (bolded: string) => {
+        parser.addRule(/\[b](.)*?\[\/b]/gs, (bolded: string) => {
             console.log(bolded, "is bold");
             if (bolded.length > 7) {
                 return { type: "bold", tree: parser.toTree(bolded.substr(3, bolded.length - 7)) };
@@ -37,7 +51,7 @@ const ContentSection: React.FC<ContentSectionProps> = (props: ContentSectionProp
             }
         });
 
-        parser.addRule(/\[i\](.)*?\[\/i\]/gs, (italics: string) => {
+        parser.addRule(/\[i](.)*?\[\/i]/gs, (italics: string) => {
             console.log(italics, "is italicized");
             if (italics.length > 7) {
                 return {
@@ -72,10 +86,10 @@ const ContentSection: React.FC<ContentSectionProps> = (props: ContentSectionProp
                     continue;
                 }
                 if (node.type === "text") {
-                    renderArray.push(<Text style={{ flexDirection: "row" }}>{node.text}</Text>);
+                    renderArray.push(node.text);
                 } else if (node.type === "bold") {
                     renderArray.push(
-                        <Text bold style={{ flexDirection: "row" }}>
+                        <Text style={{ flexDirection: "row", fontWeight: "800", fontSize: 14 }}>
                             {renderTree(node.tree)}
                         </Text>
                     );
@@ -88,9 +102,12 @@ const ContentSection: React.FC<ContentSectionProps> = (props: ContentSectionProp
                 } else if (node.type === "link") {
                     renderArray.push(
                         <Text
-                            style={{ color: primaryColour, textDecorationLine: "underline" }}
+                            style={{
+                                color: theme["color-primary-500"],
+                                textDecorationLine: "underline",
+                            }}
                             onPress={() => {
-                                navigation.navigate("Document", { id: node.link });
+                                navigation.push("Document", { id: node.link });
                             }}
                         >
                             {renderTree(node.tree)}
@@ -101,54 +118,104 @@ const ContentSection: React.FC<ContentSectionProps> = (props: ContentSectionProp
             return renderArray;
         };
 
-        return <Text>{renderTree(tree)}</Text>;
+        return <Text onPress={setEditingTrue}>{renderTree(tree)}</Text>;
     };
 
     return (
         <Section last={last}>
             <View style={{ flexDirection: "row", alignContent: "center" }}>
                 <View
-                    style={{ flexWrap: "wrap", flexDirection: editing ? "column" : "row", flex: 1 }}
+                    style={{ flexWrap: "wrap", flexDirection: "column", flex: 1, marginRight: 13 }}
                 >
                     <EditText
-                        style={[headingFont]}
+                        renderText={(value, setEditing) => (
+                            <Text category={"h2"} onPress={setEditing}>
+                                {value || "---"}
+                            </Text>
+                        )}
                         fieldName={`${fieldName}.name`}
-                        nonEditStyle={{ marginRight: 13 }}
                     />
 
                     <EditText
-                        style={{ fontWeight: "bold", alignSelf: "flex-end" }}
-                        nonEditStyle={{ marginBottom: 6 }}
-                        editStyle={{ alignSelf: "stretch" }}
+                        renderText={(value, setEditing) => (
+                            <Text bold style={{ marginBottom: 6 }} onPress={setEditing}>
+                                {value || "---"}
+                            </Text>
+                        )}
+                        editStyle={{ flex: 1 }}
                         fieldName={`${fieldName}.description`}
                     />
                 </View>
-                {editing && (
-                    <>
-                        <TouchableOpacity
-                            onPress={() => {
-                                removeSection();
-                            }}
-                        >
-                            <Icon
-                                name={"trash-outline"}
-                                fill={primaryColour}
-                                style={{
-                                    width: 24,
-                                    height: 24,
-                                    marginLeft: 13,
-                                }}
-                            />
-                        </TouchableOpacity>
-                    </>
-                )}
+                <TouchableOpacity onPress={moveContentUp} style={{}}>
+                    <Icon
+                        name={"arrow-up-outline"}
+                        fill={theme["color-primary-500"]}
+                        style={{
+                            width: 24,
+                            height: 24,
+                            marginLeft: 13,
+                            alignSelf: "flex-end",
+                        }}
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={moveContentDown} style={{}}>
+                    <Icon
+                        name={"arrow-down-outline"}
+                        fill={theme["color-primary-500"]}
+                        style={{
+                            width: 24,
+                            height: 24,
+                            marginLeft: 13,
+                            alignSelf: "flex-end",
+                        }}
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={() => {
+                        removeSection();
+                    }}
+                >
+                    <Icon
+                        name={"trash-outline"}
+                        fill={theme["color-primary-500"]}
+                        style={{
+                            width: 24,
+                            height: 24,
+                            marginLeft: 13,
+                        }}
+                    />
+                </TouchableOpacity>
             </View>
             <EditText
                 fieldName={`${fieldName}.content`}
                 multiline
                 numberOfLines={5}
-                renderContent={(content: string) => renderSudoMarkdown(content)}
+                renderText={(value, setEditing) => (
+                    <MarkedText onPress={setEditing}>{value || "---"}</MarkedText>
+                )}
             />
+
+            <View style={{ flexDirection: "row", flexGrow: 1, justifyContent: "flex-end" }}>
+                <TouchableOpacity onPress={addContentUnder} style={{ alignSelf: "flex-end" }}>
+                    <Icon
+                        name={"plus-outline"}
+                        fill={theme["color-primary-500"]}
+                        style={{ width: 24, height: 24, marginLeft: 13, alignSelf: "flex-end" }}
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={duplicateContent} style={{ alignSelf: "flex-end" }}>
+                    <Icon
+                        name={"copy-outline"}
+                        fill={theme["color-primary-500"]}
+                        style={{
+                            width: 24,
+                            height: 24,
+                            marginLeft: 13,
+                            alignSelf: "flex-end",
+                        }}
+                    />
+                </TouchableOpacity>
+            </View>
         </Section>
     );
 };

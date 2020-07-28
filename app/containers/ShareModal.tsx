@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import { TouchableOpacity, View, ViewProps } from "react-native";
 import Text from "../components/Text";
-import { Card, Icon, Modal } from "@ui-kitten/components";
+import { Card, Icon, Modal, useTheme } from "@ui-kitten/components";
 import Select, { DataItem } from "../components/Select";
 import { AccessEnum, VisibilityEnum } from "../graph/graphql";
 import { ThemeContext } from "../utils/ThemeContext";
@@ -30,8 +30,7 @@ const validationSchema = Yup.object({});
 
 const ShareModal: React.FC<ShareModalProps> = (props: ShareModalProps) => {
     const { visible, setVisible, privacySettings, isAuthor, onSubmit } = props;
-
-    const { primaryColour } = useContext(ThemeContext);
+    const theme = useTheme();
 
     const items = [
         {
@@ -89,7 +88,7 @@ const ShareModal: React.FC<ShareModalProps> = (props: ShareModalProps) => {
                                 { flexDirection: "row", justifyContent: "space-between" },
                             ]}
                         >
-                            <Text subheading bold>
+                            <Text category={"s1"} bold>
                                 Share Page
                             </Text>
                             <TouchableOpacity
@@ -102,7 +101,7 @@ const ShareModal: React.FC<ShareModalProps> = (props: ShareModalProps) => {
                             >
                                 <Icon
                                     name={"close"}
-                                    fill={primaryColour}
+                                    fill={theme["basic-primary-color-500"]}
                                     style={{
                                         width: 24,
                                         height: 24,
@@ -118,7 +117,7 @@ const ShareModal: React.FC<ShareModalProps> = (props: ShareModalProps) => {
                         </View>
                     )}
                 >
-                    <Text subheading>Visibility</Text>
+                    <Text category={"s1"}>Visibility</Text>
                     <Select
                         disabled={!isAuthor}
                         data={items}
@@ -133,7 +132,7 @@ const ShareModal: React.FC<ShareModalProps> = (props: ShareModalProps) => {
                     />
                     {values.visibility === VisibilityEnum.Public && (
                         <View style={{ marginTop: 13 }}>
-                            <Text subheading>Link Access Control</Text>
+                            <Text category={"s1"}>Link Access Control</Text>
                             <Select
                                 disabled={!isAuthor}
                                 data={[
@@ -150,7 +149,7 @@ const ShareModal: React.FC<ShareModalProps> = (props: ShareModalProps) => {
                     )}
                     {values.visibility === VisibilityEnum.Users && isAuthor && (
                         <View style={{ marginTop: 13 }}>
-                            <Text subheading>User Access Control</Text>
+                            <Text category={"s1"}>User Access Control</Text>
                             {values.usersAccess.map(({ user, accessType }, index) => (
                                 <View
                                     style={{
@@ -174,7 +173,7 @@ const ShareModal: React.FC<ShareModalProps> = (props: ShareModalProps) => {
                                     >
                                         <Icon
                                             name={"close"}
-                                            fill={primaryColour}
+                                            fill={theme["basic-primary-color-500"]}
                                             style={{
                                                 width: 24,
                                                 height: 24,

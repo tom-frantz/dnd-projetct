@@ -14,6 +14,7 @@ import { RegisterDocument, RegisterMutation, RegisterMutationVariables } from ".
 import { ThemeContext } from "../utils/ThemeContext";
 import { AuthContext } from "../app/auth";
 import FormikTextField from "../components/form/FormikTextField";
+import { Layout, useTheme } from "@ui-kitten/components";
 
 interface RegisterScreenProps {}
 
@@ -31,17 +32,18 @@ const validationSchema = Yup.object({
 
 const RegisterScreen: React.FC<RegisterScreenProps> = (props: RegisterScreenProps) => {
     const navigation = useNavigation();
-    const { dangerColour } = useContext(ThemeContext);
     const [register, { loading }] = useMutation<RegisterMutation, RegisterMutationVariables>(
         RegisterDocument
     );
 
+    const theme = useTheme();
+
     const { setTokens } = useContext(AuthContext);
 
     return (
-        <View style={{ alignItems: "center", margin: 13 * 4 }}>
+        <Layout level={"4"} style={{ alignItems: "center", padding: 13 * 4 }}>
             <Section style={{ width: 400, alignSelf: "center", margin: 13 * 4 }} first last>
-                <Text heading>Register</Text>
+                <Text category={"h1"}>Register</Text>
                 <Formik
                     initialValues={{ username: "", password: "", confirmPassword: "" }}
                     validationSchema={validationSchema}
@@ -88,7 +90,11 @@ const RegisterScreen: React.FC<RegisterScreenProps> = (props: RegisterScreenProp
                                     label={"Confirm Password"}
                                     style={{ alignSelf: "stretch" }}
                                 />
-                                {status && <Text style={{ color: dangerColour }}>{status}</Text>}
+                                {status && (
+                                    <Text style={{ color: theme["color-danger-500"] }}>
+                                        {status}
+                                    </Text>
+                                )}
                             </View>
                             <View
                                 style={{
@@ -118,24 +124,8 @@ const RegisterScreen: React.FC<RegisterScreenProps> = (props: RegisterScreenProp
                     )}
                 </Formik>
             </Section>
-        </View>
+        </Layout>
     );
 };
-
-const styles = StyleSheet.create({
-    containerStyleOverride: { marginTop: -16, width: "100%" },
-    labelTextOverride: {
-        fontFamily: "Quattrocento Sans Regular",
-        fontSize: 14,
-        paddingLeft: Platform.OS == "web" ? "33.3333333%" : undefined,
-    },
-    override: {
-        fontFamily: "Quattrocento Sans Regular",
-        fontSize: 14,
-        marginTop: 24,
-        flexGrow: 1,
-        transform: [{ translateY: 0 }],
-    },
-});
 
 export default RegisterScreen;

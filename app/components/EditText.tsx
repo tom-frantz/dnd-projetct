@@ -5,12 +5,16 @@ import { useField } from "formik";
 import moment from "moment";
 import { TextField } from "react-native-material-textfield";
 
-import Text from "./Text";
+import Text, { TextProps } from "./Text";
 import { EditingContext } from "../utils/EditingContext";
 import FormikTextField from "./form/FormikTextField";
+import { Input } from "@ui-kitten/components";
 
-interface EditTextProps {
+interface EditTextProps extends TextProps {
     fieldName: string;
+    // children: (value: string) => React.ReactNode;
+    renderText?(value: string, setEditing: () => void): React.ReactNode;
+    renderField?(): React.ReactNode;
 
     style?: StyleProp<TextStyle>;
     editStyle?: StyleProp<TextStyle>;
@@ -18,7 +22,7 @@ interface EditTextProps {
 
     multiline?: boolean;
     numberOfLines?: number;
-    renderContent?: (value: string) => React.ReactNode;
+    renderContent?: (value: string, setEditingTrue: () => void) => React.ReactNode;
 }
 
 const EditText: React.FC<EditTextProps> = (props: EditTextProps) => {
@@ -30,10 +34,20 @@ const EditText: React.FC<EditTextProps> = (props: EditTextProps) => {
         multiline,
         numberOfLines,
         renderContent,
+        renderField,
+        renderText,
+        ...textProps
     } = props;
-    const { editing } = useContext(EditingContext);
+    const { startUpdate } = useContext(EditingContext);
 
-    const textFieldRef = useRef<TextField>();
+    const [editing, setEditing] = useState(false);
+
+    const textFieldRef = useRef<Input>();
+
+    useEffect(() => {
+        if (textFieldRef.current && editing) textFieldRef.current.focus();
+    }, [editing, textFieldRef]);
+
     const [input] = useField(fieldName);
 
     const fieldNameElements = fieldName.split(".");
@@ -42,20 +56,43 @@ const EditText: React.FC<EditTextProps> = (props: EditTextProps) => {
     if (editing) {
         return (
             <FormikTextField
+                //@ts-ignore
+                ref={textFieldRef}
                 fieldName={fieldName}
                 label={label}
                 style={[style, editStyle]}
                 multiline={multiline}
                 numberOfLines={numberOfLines}
+                onBlur={() => {
+                    setEditing(false);
+                    if (startUpdate) startUpdate();
+                }}
             />
         );
     } else {
-        if (textFieldRef.current) textFieldRef.current.blur();
-        return renderContent != undefined ? (
-            (renderContent(input.value) as null)
+        return renderText ? (
+            renderText(input.value, () => setEditing(true))
         ) : (
-            <Text style={[style, nonEditStyle]}>{input.value}</Text>
+            <Text {...textProps} onPress={() => setEditing(true)}>
+                {input.value}
+            </Text>
         );
+        // if (textFieldRef.current) textFieldRef.current.blur();
+        // return renderContent != undefined ? (
+        //     (renderContent(input.value, () => {
+        //         setEditing(true);
+        //     }) as null)
+        // ) : (
+        //     <Text
+        //         style={[style, nonEditStyle]}
+        //         {...textProps}
+        //         onPress={() => {
+        //             setEditing(true);
+        //         }}
+        //     >
+        //         {input.value}
+        //     </Text>
+        // );
     }
 };
 

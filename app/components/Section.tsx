@@ -23,7 +23,7 @@ const Section: React.FC<SectionProps> = (props: SectionProps) => {
 
 const styles = {
     section: {
-        backgroundColor: "#FFF",
+        // backgroundColor: "#FFF",
         padding: 13,
         margin: 13,
         marginBottom: 13,

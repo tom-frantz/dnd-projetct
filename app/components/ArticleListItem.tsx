@@ -29,16 +29,16 @@ const ArticleListItem: React.FC<ArticleListItemProps> = (props: ArticleListItemP
                 borderBottomWidth: 0.8,
             }}
         >
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Icon
-                    name={"subject"}
-                    type={"material"}
-                    color={primaryColour}
-                    style={{ padding: 13 }}
-                    onPress={() => {}}
-                />
+            <View style={{ flexDirection: "row", alignItems: "center", minHeight: 40, padding: 6.5 }}>
+                {/*<Icon*/}
+                {/*    name={"subject"}*/}
+                {/*    type={"material"}*/}
+                {/*    color={primaryColour}*/}
+                {/*    style={{ padding: 13 }}*/}
+                {/*    onPress={() => {}}*/}
+                {/*/>*/}
                 <View>
-                    <Text subheading>{title}</Text>
+                    <Text category={"s1"}>{title}</Text>
                     {description && <Text>{description}</Text>}
                     {authorUsername && (
                         <Text>

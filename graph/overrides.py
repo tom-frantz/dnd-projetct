@@ -101,14 +101,16 @@ class OverriddenView(GraphQLView):
             if show_graphiql:
                 return self.render_graphiql(params=all_params[0], result=result)
 
-            return Response(result, status=status_code, content_type='application/json')
+            return Response(
+                result, status=status_code, content_type='application/expoAppJson'
+            )
 
         except HttpQueryError as e:
             return Response(
                 self.encode({'errors': [self.format_error(e)]}),
                 status=e.status_code,
                 headers=e.headers,
-                content_type='application/json',
+                content_type='application/expoAppJson',
             )
 
 

@@ -1,0 +1,24 @@
+{
+  "strict":{
+    "text-font-family": "Quattrocento Sans Regular",
+
+    "text-heading-1-font-family": "Quattrocento Sans Regular",
+    "text-heading-2-font-family": "Quattrocento Sans Regular",
+    "text-heading-3-font-family": "Quattrocento Sans Regular",
+    "text-heading-4-font-family": "Quattrocento Sans Regular",
+    "text-heading-5-font-family": "Quattrocento Sans Regular",
+    "text-heading-6-font-family": "Quattrocento Sans Regular",
+
+    "text-subtitle-1-font-family": "Quattrocento Sans Regular",
+    "text-subtitle-2-font-family": "Quattrocento Sans Regular",
+
+    "text-paragraph-1-font-family": "Quattrocento Sans Regular",
+    "text-paragraph-2-font-family": "Quattrocento Sans Regular",
+
+    "text-caption-1-font-family": "Quattrocento Sans Regular",
+    "text-caption-2-font-family": "Quattrocento Sans Regular",
+
+    "text-label-font-family": "Quattrocento Sans Regular"
+
+  }
+}
