@@ -21,7 +21,7 @@ graphql-ws==0.3.1
 greenlet==0.4.15
 iso8601==0.1.12
 itsdangerous==1.1.0
-Jinja2==2.11.2
+Jinja2==2.11.3
 MarkupSafe==1.1.1
 mongoengine==0.20.0
 passlib==1.7.2
