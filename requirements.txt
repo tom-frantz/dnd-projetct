@@ -5,7 +5,7 @@ click==7.1.2
 dnspython==1.16.0
 dnspython3==1.15.0
 Flask==1.1.2
-Flask-Cors==3.0.8
+Flask-Cors==3.0.9
 Flask-GraphQL==2.0.1
 Flask-JWT-Extended==3.24.1
 Flask-Sockets==0.2.1
